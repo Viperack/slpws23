@@ -8,15 +8,25 @@ $db = SQLite3::Database.new("db/db.db")
 $db.results_as_hash = true
 
 def add_user(name, email, password)
-    password_digest = BCrypt:Password.create(password)
+    password_digest = BCrypt::Password.create(password)
 
     $db.execute("INSERT INTO User (name, email, password) VALUES (?, ?, ?)", name, email, password_digest)
 end
 
-def check_login(email, password)
-    password_digest = BCrypt:Password.create(password)
+def user_exists?(email)
+    response = $db.execute("SELECT * FROM User WHERE email = ? ", email)
 
-    response = $db.execute("SELECT * FROM User WHERE email = ? AND password = ?", email, password_digest)
+    return response[0]
+end
 
-    return response.length > 0 ? response[0] : nil
+def get_user(email)
+    response = $db.execute("SELECT * FROM User WHERE email = ?", email)
+
+    user = response.first
+
+    return user
+end
+
+def wipe_users()
+    $db.execute("DELETE FROM User")
 end
