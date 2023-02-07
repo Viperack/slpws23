@@ -10,10 +10,12 @@ html lang="en"
       h1 Bank Theo
 
     nav
-      a href="/" Account 1
-      a href="/" Account 2
-      a href="/sign_in" Sign in
-      a href="/sign_up" Open back account
+      - if session[:user_rank] == "guest"
+          a href="/sign_in" Sign in
+          a href="/sign_up" Open back account
+      - else 
+          a href="/sign_out" Sign out
+      
   
     ==yield
   

@@ -27,6 +27,10 @@ def get_user(email)
     return user
 end
 
+def get_user_bank_accounts(user_id)
+    
+end
+
 def wipe_users()
     $db.execute("DELETE FROM User")
 end

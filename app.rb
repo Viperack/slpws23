@@ -7,7 +7,9 @@ require_relative 'dao.rb'
 enable :sessions
 
 before do
-    if request.path_info != '/' && session[:user_rank] == "guest"
+    protected_paths = ["/home"]
+
+    if protected_paths.include?(request.path_info) && session[:user_rank] == "guest"
         redirect('/')
     end
 end
@@ -60,7 +62,7 @@ post('/sign_in') do
 
     session["user_error"] = ""
     session["user_data"] = user
-    session[:user_rank] = "customer"
+    session[:user_rank] = "user"
     redirect("/home")
 end
 
