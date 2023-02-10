@@ -13,7 +13,8 @@ html lang="en"
       - if session[:user_rank] == "guest"
           a href="/sign_in" Sign in
           a href="/sign_up" Open back account
-      - else 
+      - else
+          a href="/open_bank_account" Open a new bank account
           a href="/sign_out" Sign out
       
   

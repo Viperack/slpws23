@@ -1,7 +1,7 @@
 h2 Sign in
 
-- if error != "" 
-   h3 = error
+- if session[:sign_in_error] != "" 
+   h3 = session[:sign_in_error]
 
 form action="/sign_in   " method="POST"
     input type="text" name="email" placeholder="Email adress"

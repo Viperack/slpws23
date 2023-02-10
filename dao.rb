@@ -34,3 +34,7 @@ end
 def wipe_users()
     $db.execute("DELETE FROM User")
 end
+
+def add_bank_account(interest, unlock_date, user_id, name)
+    $db.execute("INSERT INTO Bank_account (balance, interest, unlock_date, id, name) VALUES (?, ?, ?, ?, ?)", 0, interest, unlock_date, user_id, name)
+end
