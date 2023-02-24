@@ -1,1 +1,8 @@
 h2 = "Welcome #{user["name"]}!"
+a href="/home/deposit" Deposit
+a href="/home/transfer" Transfer
+
+- for i in 0...bank_accounts.length 
+    h3 #{bank_accounts[i]["name"]}
+    h3 Balance: $#{(bank_accounts[i]["balance"] / 100.0).round(2)}
+    a href="home/close_bank_account/#{i}" Close bank account

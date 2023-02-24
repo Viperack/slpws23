@@ -3,7 +3,7 @@ h2 Sign in
 - if session[:sign_in_error] != "" 
    h3 = session[:sign_in_error]
 
-form action="/sign_in   " method="POST"
+form action="/sign_in" method="POST"
     input type="text" name="email" placeholder="Email adress"
     input type="password" name="password" placeholder="Password"
     input type="submit" value="Submit"

@@ -17,18 +17,16 @@ before do
         session[:sign_up_error] = ""
     end
 
-    protected_paths = ["/home"]
+    unprotected_paths = ['/', '/sign_in', '/sign_up']
 
-    if protected_paths.include?(request.path_info) && session[:user_rank] == "guest"
+    if !unprotected_paths.include?(request.path_info) && session[:user_rank] == "guest"
         redirect('/')
     end
 end
 
 
 get('/') do
-    # wipe_users()
-
-    slim(:landing_page)
+    slim(:index)
 end
 
 
@@ -39,8 +37,6 @@ end
 post('/sign_in') do
     email = params["email"]
     password  = params["password"]
-
-    # puts "DEBUG #{email} #{password}"
 
     if email == ""
         session["user_error"] = "Email must be entered to sign in"
@@ -115,7 +111,13 @@ end
 
 
 get('/home') do
-    slim(:home, locals:{user:session["user_data"]})
+    user = session[:user_data]
+    user_id = user["id"]
+
+    session[:bank_accounts] = get_user_bank_accounts(user_id)
+    bank_accounts = session[:bank_accounts]
+
+    slim(:home, locals:{user:user, bank_accounts:bank_accounts})
 end
 
 get('/sign_out') do
@@ -124,21 +126,47 @@ get('/sign_out') do
 end
 
 get('/open_bank_account') do
-    slim(:"/bank_account/open_bank_account")
+    slim(:"/open_bank_account/index")
 end
 
 get('/open_bank_account/payroll_account') do
-    slim(:"/bank_account/payroll_account")
+    slim(:"/open_bank_account/payroll_account")
 end
 
 post('/open_bank_account/payroll_account') do
     name = params[:name]
     time_now = Time.now.to_i
 
-    add_bank_account(0, time_now, session[:user_data]["id"], name)
+    add_bank_account(0, time_now, name)
+
+    redirect('/home')
 end
 
 get('/open_bank_account/savings_account') do
-    slim(:"/bank_account/savings_account")
+    slim(:"/open_bank_account/savings_account")
     
+end
+
+get('/home/close_bank_account/:index') do
+    index = params[:index].to_i
+    bank_accounts = session[:bank_accounts]
+
+    slim(:close_bank_account, locals:{bank_accounts:bank_accounts, index:index})
+    
+end
+
+post('/home/close_bank_account') do
+    destination_bank_account_id = params["destination_bank_account"]
+    origin_bank_account_id = params["origin_bank_account"]
+
+    puts "origin: #{origin_bank_account_id}, destination: #{destination_bank_account_id}"
+
+    size = get_balance(origin_bank_account_id)
+
+    change_balance(origin_bank_account_id, -size)
+    change_balance(destination_bank_account_id, size)
+
+    close_bank_account(origin_bank_account_id)
+    
+    redirect('/home')
 end
