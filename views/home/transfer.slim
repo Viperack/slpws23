@@ -1,1 +1,19 @@
 h3 Transfer
+
+- if session[:transfer_error] != "" 
+   h3 = session[:transfer_error]
+
+form action="/home/transfer" method="POST"
+    h3 How much money do you want to transfer?
+    input type="number" name="transfer_size" placeholder="$USD" step=".01"
+
+    h3 Which of your accounts do you want to transfer money from?
+    select name="origin_bank_account_id"
+        - for bank_account in bank_accounts
+            - if bank_account["locked"] == 0
+                option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+
+    h3 Whats the IBAN of the account you want to transfer money to?
+    input type="text" name="destination_iban" 
+
+    input type="submit" value="Submit"

@@ -1,8 +1,11 @@
 form action="/home/deposit" method="POST"
-    h3 Which account do you want to deposit money into?
-    select name="destination_bank_account"
-        - for bank_account in bank_accounts
-            option value="#{bank_account["id"]}" #{bank_account["name"]} (#{(bank_account["balance"] / 100.0).round(2)})
     h3 How much money do you want to deposit?
-    input type="number" name="deposit_size" placeholder="USD" step=".01"
+    input type="number" name="deposit_size" placeholder="$USD" step=".01"
+
+    h3 Which account do you want to deposit money into?
+    select name="destination_bank_account_id"
+        - for bank_account in bank_accounts
+            - if bank_account["locked"] == 0
+                option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+
     input type="submit" value="Submit"

@@ -6,4 +6,9 @@ a href="/home/transfer" Transfer
     h3 #{bank_accounts[i]["name"]}
     p IBAN: #{display_iban(bank_accounts[i]["iban"])}
     p Balance: $#{display_balance(bank_accounts[i]["balance"])}
+    - date = epoch_to_date(bank_accounts[i]["unlock_date"])
+    - if date != nil 
+        p Unlock date: #{date}
+        p Interest rate: #{display_balance(bank_accounts[i]["interest"])}%
     a href="home/close_bank_account/#{i}" Close bank account
+    a href="home/add_user_to_account/#{i}" Add user to bank account

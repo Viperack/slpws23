@@ -1,0 +1,14 @@
+h3 Savings account
+
+- if session[:savings_account_create_error] != "" 
+   h3 = session[:savings_account_create_error]
+
+form action="/open_bank_account/savings_account" method="POST"
+    input type="text" name="name" placeholder="Name of account"
+    
+    select name="time_deposit"
+        - for interest_rate in interest_rates
+            option value="#{interest_rate['time_deposit']},#{interest_rate['interest']}" #{interest_rate["time_deposit"]} (#{display_balance(interest_rate['interest'])}%)
+
+    input type="submit" value="Submit"
+
