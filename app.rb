@@ -24,6 +24,18 @@ before do
     end
 end
 
+helpers do
+    def display_balance(balance)
+        (balance / 100.0).round(2)
+    end
+
+    def display_iban(iban_string)
+        iban_string.insert(4, " ")
+        iban_string.insert(9, " ")
+
+        return iban_string
+    end
+end
 
 get('/') do
     slim(:index)
@@ -117,7 +129,7 @@ get('/home') do
     session[:bank_accounts] = get_user_bank_accounts(user_id)
     bank_accounts = session[:bank_accounts]
 
-    slim(:home, locals:{user:user, bank_accounts:bank_accounts})
+    slim(:"home/index", locals:{user:user, bank_accounts:bank_accounts})
 end
 
 get('/sign_out') do
@@ -126,11 +138,11 @@ get('/sign_out') do
 end
 
 get('/open_bank_account') do
-    slim(:"/open_bank_account/index")
+    slim(:"/home/open_bank_account/index")
 end
 
 get('/open_bank_account/payroll_account') do
-    slim(:"/open_bank_account/payroll_account")
+    slim(:"/home/open_bank_account/payroll_account")
 end
 
 post('/open_bank_account/payroll_account') do
@@ -143,7 +155,7 @@ post('/open_bank_account/payroll_account') do
 end
 
 get('/open_bank_account/savings_account') do
-    slim(:"/open_bank_account/savings_account")
+    slim(:"home/open_bank_account/savings_account")
     
 end
 
@@ -151,7 +163,7 @@ get('/home/close_bank_account/:index') do
     index = params[:index].to_i
     bank_accounts = session[:bank_accounts]
 
-    slim(:close_bank_account, locals:{bank_accounts:bank_accounts, index:index})
+    slim(:"home/close_bank_account", locals:{bank_accounts:bank_accounts, index:index})
     
 end
 
@@ -169,4 +181,23 @@ post('/home/close_bank_account') do
     close_bank_account(origin_bank_account_id)
     
     redirect('/home')
+end
+
+get('/home/deposit') do
+    bank_accounts = session[:bank_accounts]
+
+    slim(:"home/deposit", locals:{bank_accounts:bank_accounts})
+end
+
+post('/home/deposit') do
+    destination_bank_account_id = params["destination_bank_account"]
+    deposit_size = (params["deposit_size"].to_f * 100).to_i
+
+    change_balance(destination_bank_account_id, deposit_size)
+
+    redirect('/home')
+end
+
+get('/home/transfer') do
+    slim(:"home/transfer")
 end

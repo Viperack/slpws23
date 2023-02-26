@@ -4,5 +4,6 @@ a href="/home/transfer" Transfer
 
 - for i in 0...bank_accounts.length 
     h3 #{bank_accounts[i]["name"]}
-    h3 Balance: $#{(bank_accounts[i]["balance"] / 100.0).round(2)}
+    p IBAN: #{display_iban(bank_accounts[i]["iban"])}
+    p Balance: $#{display_balance(bank_accounts[i]["balance"])}
     a href="home/close_bank_account/#{i}" Close bank account

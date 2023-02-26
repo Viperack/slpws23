@@ -7,6 +7,16 @@ require 'sinatra/reloader'
 $db = SQLite3::Database.new("db/db.db")
 $db.results_as_hash = true
 
+def int_to_string(int, string_length)
+    string = int.to_s
+
+    for i in 0...(string_length-string.length)
+        string = "0" + string
+    end
+
+    return string
+end
+
 def add_user(name, email, password)
     password_digest = BCrypt::Password.create(password)
 
@@ -39,7 +49,18 @@ def wipe_table(table)
 end
 
 def add_bank_account(interest, unlock_date, name)
-    $db.execute("INSERT INTO Bank_account (balance, interest, unlock_date, name) VALUES (?, ?, ?, ?)", 0, interest, unlock_date, name)
+    bban = Random.rand(100000000)
+    bban_string = int_to_string(bban, 8)
+
+    while $db.execute("SELECT * FROM Bank_account WHERE iban = ?", bban_string).length != 0
+        bban = Random.rand(100000000)
+        bban_string = int_to_string(bban)
+    end
+
+    digits_sum = bban.digits.sum
+    bban_string = "GB" + digits_sum.to_s + bban_string
+
+    $db.execute("INSERT INTO Bank_account (balance, name, interest, unlock_date, iban) VALUES (?, ?, ?, ?, ?)", 0, name, interest, unlock_date, bban_string)
 
     bank_account_id = $db.execute('SELECT last_insert_rowid()')[0]['last_insert_rowid()']
     user_id = session[:user_data]["id"]
@@ -60,5 +81,6 @@ def change_balance(bank_account_id, size)
 end
 
 def close_bank_account(bank_account_id)
-    $db.execute("DELETE Bank_account WHERE id = ?", bank_account_id)
+    $db.execute("DELETE FROM Bank_account WHERE id = ?", bank_account_id)
+    $db.execute("DELETE FROM User_bank_account_rel WHERE bank_account_id = ?", bank_account_id)
 end

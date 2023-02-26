@@ -1,9 +1,12 @@
-h3 What account do you want the rest of the money going to? ($#{(bank_accounts[index]["balance"] / 100.0).round(2)})
+h3 Which account do you want the rest of the money going to? ($#{display_balance(bank_accounts[index]["balance"])})
 
-form action="/home/close_bank_account" method="POST"
+- if bank_accounts.length >= 2
+    form action="/home/close_bank_account" method="POST"
     input type="hidden" name="origin_bank_account" value="#{bank_accounts[index]["id"]}"
     select name="destination_bank_account"
         - for bank_account in bank_accounts
             - if bank_account["id"] != bank_accounts[index]["id"]
                 option value="#{bank_account["id"]}" #{bank_account["name"]} (#{(bank_account["balance"] / 100.0).round(2)})
     input type="submit" value="Submit"
+- else 
+    p You can't close your last bank account

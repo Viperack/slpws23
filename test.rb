@@ -1,4 +1,9 @@
-array = [1]
+string = "AAAAAAAAAAAA"
+def display_iban(iban_string)
+    iban_string.insert(5, " ")
+    iban_string.insert(9, " )
 
-p array[0]
-p array[1]
+    return iban_string
+end
+
+puts display_iban(string)
