@@ -1,7 +1,7 @@
 - if bank_accounts.length < 2
-    h3 You can't close your last bank account
+    h3 You can"t close your last bank account
 - elsif bank_accounts[index]["locked"] == 1
-    h3 You can't close a bank account before the unlock date
+    h3 You can"t close a bank account before the unlock date
 - else
     h3 Which account do you want the rest of the money going to? ($#{display_balance(bank_accounts[index]["balance"])})
 

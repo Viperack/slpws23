@@ -2,6 +2,7 @@ h2 = "Welcome #{user["name"]}!"
 a href="/home/deposit" Deposit
 a href="/home/transfer" Transfer
 
+h2 Bank accounts
 - for i in 0...bank_accounts.length 
     h3 #{bank_accounts[i]["name"]}
     p IBAN: #{display_iban(bank_accounts[i]["iban"])}
@@ -12,3 +13,12 @@ a href="/home/transfer" Transfer
         p Interest rate: #{display_balance(bank_accounts[i]["interest"])}%
     a href="home/close_bank_account/#{i}" Close bank account
     a href="home/add_user_to_account/#{i}" Add user to bank account
+
+h2 Loans
+- for i in 0...loans.length 
+    p Size: #{display_iban(loans[i]["size"])}
+    p Remaining: $#{display_balance(loans[i]["size"] - loans[i]["amount_payed"])}
+    p Start date#{epoch_to_date(loans[i]["start_time"])}
+    p Interest rate: #{display_balance(bank_accounts[i]["interest"])}%
+    a href="home/close_bank_account/#{i}" Close bank account
+    a href="home/add_user_to_account/#{i}" Add user to bank account 

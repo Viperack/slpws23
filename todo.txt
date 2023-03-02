@@ -1,5 +1,0 @@
-Cool down for if user attemps to many logins ins in a short timeframe
-Only accept strong passwords from user
-Can't put money into interest account after it has been locked
-Admin accounts which can change time deposits and interest rates and transaction logs
-Take loans

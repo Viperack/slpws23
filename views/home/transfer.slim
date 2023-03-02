@@ -13,7 +13,13 @@ form action="/home/transfer" method="POST"
             - if bank_account["locked"] == 0
                 option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
 
-    h3 Whats the IBAN of the account you want to transfer money to?
-    input type="text" name="destination_iban" 
+    h3 Which of your accounts do you want to transfer money to?
+    select name="destination_bank_account_id"
+        - for bank_account in bank_accounts
+            - if bank_account["locked"] == 0
+                option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+    
+    h3 = "(Optional) Send money to account by IBAN"
+    input type="text" name="destination_iban" placeholder="IBAN"
 
     input type="submit" value="Submit"
