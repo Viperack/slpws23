@@ -12,11 +12,11 @@ html lang="en"
     nav
       - if session[:user_rank] == "guest"
           a href="/sign_in" Sign in
-          a href="/sign_up" Open back account
+          a href="/sign_up" Open user account
       - elsif session[:user_rank] == "user"
-          a href="home/open_bank_account" Open a new bank account
-          a href="home/take_loan" Take a loan
-          a href="sign_out" Sign out
+          a href="/home/bank_account/open" Open bank account
+          a href="/home/loan/take" Take loan
+          a href="/sign_out" Sign out
       - elsif session[:user_rank] == "admin"
 
       

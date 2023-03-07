@@ -1,0 +1,25 @@
+h3 Savings account
+
+- if session[:savings_account_create_error] != "" 
+   h3 = session[:savings_account_create_error]
+
+form action="/home/bank_account/open/savings" method="POST"
+    input type="text" name="name" placeholder="Name of account"
+
+    h3 How much money do you want to put into the savings bank account?
+    input type="number" name="transfer_size" placeholder="$USD" step=".01"
+
+    h3 Which of your accounts do you want to transfer money from?
+    select name="origin_bank_account_id"
+        - for bank_account in bank_accounts
+            - if bank_account["locked"] == 0
+                option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+        option value="deposit" Deposit
+    
+    h3 For how long do you want the bank account to be locked for?
+    select name="time_deposit"
+        - for interest_rate in interest_rates
+            - if interest_rate["type"] == "Savings"
+                option value="#{interest_rate["time_deposit"]},#{interest_rate["interest"]}" #{interest_rate["time_deposit"]} Years (#{display_balance(interest_rate["interest"])}%)
+
+    input type="submit" value="Submit"

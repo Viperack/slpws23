@@ -1,45 +1,68 @@
-get("/home/open_bank_account") do
-    slim(:"/home/open_bank_account/index")
+get("/home/bank_account/open") do
+    slim(:"/home/bank_account/open/index")
 end
 
-get("/home/open_bank_account/payroll_account") do
-    slim(:"/home/open_bank_account/payroll_account")
+get("/home/bank_account/open/payroll") do
+    slim(:"/home/bank_account/open/payroll")
 end
 
-post("/home/open_bank_account/payroll_account") do
-    name = params[:name]
+post("/home/bank_account/open/payroll") do
+    username = params[:name]
     time_now = Time.now.to_i
 
-    $db.add_bank_account(session[:user_data]["id"], 0, time_now, name, 0)
+    $db.add_bank_account(session[:user_data]["id"], 0, time_now, username, 0)
 
     redirect("/home")
 end
 
-get("/home/open_bank_account/savings_account") do
-    interest_rates = $db.get_interest_rates()
+get("/home/bank_account/open/savings") do
+    interest_rates = $db.get_interest_rates("Savings")
 
-    slim(:"home/open_bank_account/savings_account", locals:{interest_rates:interest_rates})
+    slim(:"/home/bank_account/open/savings", locals:{bank_accounts: session[:bank_accounts], interest_rates:interest_rates})
 end
 
-post("/home/open_bank_account/savings_account") do
-    name = params[:name]
+post("/home/bank_account/open/savings") do
+    transfer_size = string_dollar_to_int_cent(params[:transfer_size]) 
     time_deposit = params[:time_deposit].split(",")[0].to_i
     interest_rate = params[:time_deposit].split(",")[1].to_i
 
+    puts params[:origin_bank_account_id]
+
+    if params[:origin_bank_account_id] != "deposit"
+        origin_bank_account_id = params[:origin_bank_account_id]
+
+        if $db.update_balance(origin_bank_account_id, -transfer_size) == nil
+            session[:savings_account_create_error] = "Not enough money in bank account"
+            redirect("/home/bank_account/open/savings")
+        end
+    else
+        origin_bank_account_id = -1
+    end
+    
     unlock_date = Time.now.to_i + 3600 * 24 * 365 * time_deposit
 
-    $db.add_bank_account(session[:user_data]["id"], interest_rate, unlock_date, name, 1)
+    $db.add_bank_account(session[:user_data]["id"], interest_rate, unlock_date, params[:name], 0)
+
+    destination_bank_account_id = $db.get_last_insert_id()
+
+    puts "ID: #{destination_bank_account_id}"
+
+    $db.update_balance(destination_bank_account_id, transfer_size)
+
+    $db.update_lock(destination_bank_account_id, 1)
+
+    $db.add_transaction_log(origin_bank_account_id, destination_bank_account_id, transfer_size, Time.now.to_i)
 
     redirect("/home")
 end
 
-get("/home/close_bank_account/:index") do
+get("/home/bank_account/:index/close") do
     index = params[:index].to_i
 
-    slim(:"home/close_bank_account", locals:{bank_accounts:session[:bank_accounts], index:index})
+    slim(:"home/bank_account/close", locals:{bank_accounts:session[:bank_accounts], index:index})
 end
 
-post("/home/close_bank_account") do
+post("/home/bank_account/close") do
 
     destination_bank_account_id = params["destination_bank_account_id"]
     origin_bank_account_id = params["origin_bank_account_id"]
@@ -64,7 +87,7 @@ end
 
 post("/home/deposit") do
     destination_bank_account_id = params["destination_bank_account_id"]
-    deposit_size = (params["deposit_size"].to_f * 100).to_i
+    deposit_size = string_dollar_to_int_cent(params["deposit_size"])
 
     $db.update_balance(destination_bank_account_id, deposit_size)
 
@@ -80,13 +103,9 @@ end
 
 post("/home/transfer") do
     destination_iban = params["destination_iban"].gsub(/\s+/, "").gsub("-", "")
-    transfer_size = (params["transfer_size"].to_f * 100).to_i
+    transfer_size = string_dollar_to_int_cent(params["transfer_size"])
     
-    if destination_iban == ""
-        destination_bank_account_id = params["destination_bank_account_id"]
-    else
-        destination_bank_account_id = $db.get_id_from_iban(destination_iban)
-    end
+    destination_bank_account_id = params["destination_bank_account_id"] == "IBAN" ? $db.get_id_from_iban(destination_iban) : params["destination_bank_account_id"]
 
     if destination_bank_account_id == nil
         session[:transfer_error] = "No bank account in Santeo Bank has that IBAN"
@@ -111,13 +130,13 @@ post("/home/transfer") do
     redirect("/home")
 end
 
-get("/home/add_user_to_account/:index") do
+get("/home/bank_account/:index/add_user") do
     bank_account_id = session[:bank_accounts][params[:index].to_i]
 
-    slim(:"home/add_user_to_account", locals:{bank_account_id:bank_account_id})
+    slim(:"home/bank_account/add_user", locals:{bank_account_id:bank_account_id})
 end
 
-post("/home/add_user_to_account/:index") do
+post("/home/bank_account/:index/add_user") do
     bank_account_id = params[:bank_account_id]
     email = params[:add_user_email]
 
@@ -132,12 +151,14 @@ post("/home/add_user_to_account/:index") do
     redirect("/home")
 end
 
-get("/home/take_loan") do
-    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
+get("/home/loan/take") do
+    interest = $db.get_interest_rates("Loan").first["interest"]
+
+    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts], interest: interest})
 end
 
-post("/home/take_loan") do
-    loan_size = (params["loan_size"].to_f * 100).to_i
+post("/home/take") do
+    loan_size = string_dollar_to_int_cent(params["loan_size"])
 
     $db.add_loan(session[:user_data]["id"], loan_size)
 
@@ -147,3 +168,13 @@ post("/home/take_loan") do
 
     redirect("/home")
 end
+
+=begin
+get("/home/:index/pay") do
+    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
+end 
+
+post("/home/:index/pay") do
+    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
+end 
+=end

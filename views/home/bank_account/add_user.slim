@@ -1,5 +1,5 @@
 h3 What is the email of the person you want to add to your bank account?
-form action="/home/add_user_to_account" method="POST"
+form action="/home/bank_account/#{bank_account_id}/add_user" method="POST"
     input type="hidden" name="bank_account_id" value="#{bank_account_id}"
     input type="email" name="add_user_email"
     input type="submit" value="Submit"

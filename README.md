@@ -2,7 +2,8 @@
 - Cool down for if user attemps to many logins ins in a short timeframe
 - Only accept strong passwords from user
 - Admin accounts which can change time deposits and interest rates and transaction logs
-- Take loans
+- Pay loans
+- Add interest to loans
 - Validering
 - Yardoc
 

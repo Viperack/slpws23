@@ -18,6 +18,8 @@ form action="/home/transfer" method="POST"
         - for bank_account in bank_accounts
             - if bank_account["locked"] == 0
                 option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+        option value="IBAN" IBAN
+        
     
     h3 = "(Optional) Send money to account by IBAN"
     input type="text" name="destination_iban" placeholder="IBAN"

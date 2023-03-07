@@ -46,7 +46,7 @@ before do
         session[:transfer_error] = ""
     end
 
-    unprotected_paths = ["/", "/sign_in", "/sign_up"]
+    unprotected_paths = ["/", "/sign_in", "/sign_up", "/debug"]
 
     if !unprotected_paths.include?(request.path_info) && session[:user_rank] == "guest"
         redirect("/")
@@ -71,5 +71,9 @@ helpers do
         end
 
         return Time.at(seconds)
+    end
+
+    def string_dollar_to_int_cent(string_dollar)
+        (string_dollar.to_f * 100).to_i
     end
 end

@@ -1,4 +1,5 @@
-form action="/home/take_loan" method="POST"
+form action="/home/loan/take" method="POST"
+    h3 The current interest rate is #{display_balance(interest)}%
     h3 How much money do you want loan?
     input type="number" name="loan_size" placeholder="$USD" step=".01"
 

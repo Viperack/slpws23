@@ -3,12 +3,12 @@ get("/sign_up") do
 end
 
 post("/sign_up") do
-    name = params["name"]
+    username = params["name"]
     email = params["email"]
     password  = params["password"]
     password_confirm = params["password_confirm"]
 
-    if name == ""
+    if username == ""
         session[:sign_up_error] = "Name must be entered to sign up"
         redirect("/sign_up")
     end
@@ -30,15 +30,12 @@ post("/sign_up") do
 
     # Everything has been checked
     session[:sign_up_error] = ""
-    $db.add_user(name, email, password)
+    $db.add_user(username, email, password)
 
     user = $db.get_user(email)
 
     session[:user_data] = user
     session[:user_rank] = "user"
-
-    session[:bank_accounts] = $db.get_bank_accounts(attribute: "user_id", value: session[:user_data]["id"])
-    session[:loans] = $db.get_loans(attribute: "user_id", value: session[:user_data]["id"])
 
     redirect("/home")
 end
