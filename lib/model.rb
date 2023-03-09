@@ -143,7 +143,7 @@ class Database
 
         add_user_to_bank_account(user_id, bank_account_id)
 
-        return get_last_insert_id()
+        return bank_account_id
     end
 
     def update_balance(bank_account_id, size)
@@ -207,14 +207,22 @@ class Database
 
     def add_loan(user_id, loan_size)
         sql = <<-SQL
-            INSERT INTO Loan (size, amount_payed, start_time)
-            VALUES (?, ?, ?)
+            INSERT INTO Loan (size, amount_payed, start_time, interest)
+            VALUES (?, ?, ?, ?)
         SQL
 
-        @db.execute(sql, loan_size, 0, Time.now.to_i)
+        interest = get_interest_rates("Loan").first["interest"]
+
+        @db.execute(sql, loan_size, 0, Time.now.to_i, interest)
 
         loan_id = get_last_insert_id()
 
+        add_user_to_loan(user_id, loan_id)
+
+        return loan_id
+    end
+
+    def add_user_to_loan(user_id, loan_id)
         sql = <<-SQL
             INSERT INTO User_loan_rel (user_id, loan_id)
             VALUES (?, ?)

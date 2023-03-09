@@ -66,10 +66,6 @@ helpers do
     end
 
     def epoch_to_date(seconds)
-        if seconds < Time.now.to_i
-            return nil
-        end
-
         return Time.at(seconds)
     end
 

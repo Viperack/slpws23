@@ -14,10 +14,11 @@ h2 Bank accounts
     a href="/home/bank_account/#{i}/add_user" Add user to bank account
 
 h2 Loans
-- for i in 0...loans.length 
-    p Size: #{display_balance(loans[i]["size"])}
+- for i in 0...(loans.length-1)
+    p Size: $#{display_balance(loans[i]["size"])}
     p Remaining: $#{display_balance(loans[i]["size"] - loans[i]["amount_payed"])}
-    p Start date#{epoch_to_date(loans[i]["start_time"])}
-    p Interest rate: #{display_balance(bank_accounts[i]["interest"])}%
+    - puts "Start date #{loans[i]["start_time"]}"
+    p Start date: #{epoch_to_date(loans[i]["start_time"])}
+    p Interest rate: #{display_balance(loans[i]["interest"])}%
     a href="/home/loan/#{i}/pay" Pay loan
     a href="/home/loan/#{i}/add_user" Add user to loan

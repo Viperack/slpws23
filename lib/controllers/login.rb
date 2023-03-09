@@ -3,7 +3,7 @@ get("/") do
     # $db.wipe_all()
 
     # For debugging
-    redirect("/debug")
+    # redirect("/debug")
 
     slim(:index)
 end

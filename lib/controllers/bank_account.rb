@@ -157,13 +157,15 @@ end
 get("/home/loan/take") do
     interest = $db.get_interest_rates("Loan").first["interest"]
 
-    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts], interest: interest})
+    slim(:"/home/loan/take", locals:{bank_accounts: session[:bank_accounts], interest: interest})
 end
 
-post("/home/take") do
+post("/home/loan/take") do
     loan_size = string_dollar_to_int_cent(params["loan_size"])
 
-    $db.add_loan(session[:user_data]["id"], loan_size)
+    loan_id = $db.add_loan(session[:user_data]["id"], loan_size)
+
+    $db.add_user_to_loan(session[:user_data]["id"], loan_id)
 
     $db.update_balance(params["destination_bank_account_id"], loan_size)
 
