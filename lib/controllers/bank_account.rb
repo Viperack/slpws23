@@ -129,7 +129,6 @@ post("/home/transfer") do
 
     $db.add_transaction_log(params["origin_bank_account_id"], destination_bank_account_id, transfer_size, Time.now.to_i)
 
-    session[:transfer_error] = ""
     redirect("/home")
 end
 
@@ -150,7 +149,6 @@ post("/home/bank_account/:index/add_user") do
 
     $db.add_user_to_bank_account(user["id"], params[:bank_account_id])
 
-    session[:add_user_to_account_error] = ""
     redirect("/home")
 end
 
@@ -183,3 +181,23 @@ post("/home/loan/:index/pay") do
     slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
 end 
 =end
+
+get("/home/loan/:index/add_user") do
+    loan_id = session[:loans][params[:index].to_i]["id"]
+
+    slim(:"/home/loan/add_user", locals:{loan_id: loan_id, index: params[:index]})
+end 
+
+post("/home/loan/:index/add_user") do
+    user = $db.get_user(params[:add_user_email])
+
+    if user == nil
+        session[:add_user_to_loan_error] = "There are no users with that email adress in Santeo Bank"
+        redirect("/home/loan/#{params[:index]}/add_user")
+        return nil
+    end
+
+    $db.add_user_invite_to_loan(user["id"], params[:loan_id])
+
+    redirect("/home")
+end 

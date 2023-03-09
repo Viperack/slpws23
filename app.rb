@@ -42,9 +42,23 @@ before do
         session[:sign_up_error] = ""
     end
 
+    if request.path_info != "/home/bank_account/open/savings"
+        session[:savings_account_create_error] = ""
+    end
+
     if request.path_info != "/home/transfer"
         session[:transfer_error] = ""
     end
+
+    if request.path_info != "/home/bank_account/:index/add_user"
+        session[:add_user_to_account_error] = ""
+    end
+
+    if request.path_info != "/home/loan/:index/add_user"
+        session[:add_user_to_loan_error] = ""
+    end
+
+
 
     unprotected_paths = ["/", "/sign_in", "/sign_up", "/debug"]
 

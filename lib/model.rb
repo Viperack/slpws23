@@ -260,4 +260,23 @@ class Database
 
         return @db.execute(sql)
     end
+
+    def add_user_invite_to_loan(user_id, loan_id)
+        sql = <<-SQL
+            INSERT INTO Loan_invite (user_id, loan_id)
+            VALUES (?, ?)
+        SQL
+
+        @db.execute(sql, user_id, loan_id)
+    end
+
+    def get_loan_invites(user_id)
+        sql = <<-SQL
+            SELECT *
+            FROM Loan_invite
+            WHERE user_id = ?
+        SQL
+    
+        @db.execute(sql, user_id)
+    end
 end

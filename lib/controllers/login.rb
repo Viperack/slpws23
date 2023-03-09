@@ -3,14 +3,14 @@ get("/") do
     # $db.wipe_all()
 
     # For debugging
-    # redirect("/debug")
+    redirect("/debug")
 
     slim(:index)
 end
 
 
 get("/sign_in") do
-    slim(:sign_in, locals:{error:session[:sign_in_error]})
+    slim(:sign_in)
 end
 
 post("/sign_in") do
@@ -45,7 +45,6 @@ post("/sign_in") do
         return nil
     end
 
-    session[:sign_in_error] = ""
 
     session[:user_data] = user
     session[:user_rank] = "user"
@@ -89,8 +88,6 @@ get("/debug") do
         redirect("sign_in")
         return nil
     end
-
-    session[:sign_in_error] = ""
 
     session[:user_data] = user
     session[:user_rank] = "user"

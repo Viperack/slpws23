@@ -1,5 +1,5 @@
 get("/sign_up") do
-    slim(:sign_up, locals:{error:session[:sign_up_error]})
+    slim(:sign_up)
 end
 
 post("/sign_up") do
@@ -33,7 +33,6 @@ post("/sign_up") do
     end
 
     # Everything has been checked
-    session[:sign_up_error] = ""
     $db.add_user(username, email, password)
 
     user = $db.get_user(email)
