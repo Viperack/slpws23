@@ -4,7 +4,7 @@ require "sqlite3"
 require "sinatra/reloader"
 require "async"
 
-require_relative "lib/dao.rb"
+require_relative "lib/model.rb"
 require_relative "lib/controllers/routes.rb"
 
 $db = Database.new("db/db.db")

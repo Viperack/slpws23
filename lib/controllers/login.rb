@@ -20,11 +20,13 @@ post("/sign_in") do
     if email == ""
         session[:sign_in_error] = "Email must be entered to sign in"
         redirect("/sign_in")
+        return nil
     end
 
     if password == ""
         session[:sign_in_error] = "Password must be entered to sign in"
         redirect("/sign_in")
+        return nil
     end
 
     user_exists = $db.get_user(email) != nil
@@ -32,6 +34,7 @@ post("/sign_in") do
     if !user_exists
         session[:sign_in_error] = "No user with that email adress exist"
         redirect("sign_in")
+        return nil
     end
 
     user = $db.get_user(email)
@@ -39,6 +42,7 @@ post("/sign_in") do
     if BCrypt::Password.new(user["password"]) != password
         session[:sign_in_error] = "Wrong combinations of email and password"
         redirect("sign_in")
+        return nil
     end
 
     session[:sign_in_error] = ""
@@ -61,11 +65,13 @@ get("/debug") do
     if email == ""
         session[:sign_in_error] = "Email must be entered to sign in"
         redirect("/sign_in")
+        return nil
     end
 
     if password == ""
         session[:sign_in_error] = "Password must be entered to sign in"
         redirect("/sign_in")
+        return nil
     end
 
     user_exists = $db.get_user(email) != nil
@@ -73,6 +79,7 @@ get("/debug") do
     if !user_exists
         session[:sign_in_error] = "No user with that email adress exist"
         redirect("sign_in")
+        return nil
     end
 
     user = $db.get_user(email)
@@ -80,6 +87,7 @@ get("/debug") do
     if BCrypt::Password.new(user["password"]) != password
         session[:sign_in_error] = "Wrong combinations of email and password"
         redirect("sign_in")
+        return nil
     end
 
     session[:sign_in_error] = ""

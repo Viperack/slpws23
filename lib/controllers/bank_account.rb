@@ -34,6 +34,7 @@ post("/home/bank_account/open/savings") do
         if $db.update_balance(origin_bank_account_id, -transfer_size) == nil
             session[:savings_account_create_error] = "Not enough money in bank account"
             redirect("/home/bank_account/open/savings")
+            return nil
         end
     else
         origin_bank_account_id = -1
@@ -41,9 +42,9 @@ post("/home/bank_account/open/savings") do
     
     unlock_date = Time.now.to_i + 3600 * 24 * 365 * time_deposit
 
-    $db.add_bank_account(session[:user_data]["id"], interest_rate, unlock_date, params[:name], 0)
+    # $db.add_bank_account(session[:user_data]["id"], interest_rate, unlock_date, params[:name], 0)
 
-    destination_bank_account_id = $db.get_last_insert_id()
+    destination_bank_account_id = $db.add_bank_account(session[:user_data]["id"], interest_rate, unlock_date, params[:name], 0)
 
     puts "ID: #{destination_bank_account_id}"
 
@@ -63,7 +64,6 @@ get("/home/bank_account/:index/close") do
 end
 
 post("/home/bank_account/close") do
-
     destination_bank_account_id = params["destination_bank_account_id"]
     origin_bank_account_id = params["origin_bank_account_id"]
 
@@ -110,17 +110,20 @@ post("/home/transfer") do
     if destination_bank_account_id == nil
         session[:transfer_error] = "No bank account in Santeo Bank has that IBAN"
         redirect("/home/transfer")
+        return nil
 
     end
 
     if $db.get_bank_accounts(attribute: "id", value: destination_bank_account_id).first["locked"] == 1
         session[:transfer_error] = "Can't send money to a locked savings account"
         redirect("/home/transfer")
+        return nil
     end
 
     if $db.update_balance(params["origin_bank_account_id"], -transfer_size) == nil
         session[:transfer_error] = "Not enough money in bank account"
         redirect("/home/transfer")
+        return nil
     end
     $db.update_balance(destination_bank_account_id, transfer_size)
 
@@ -131,21 +134,21 @@ post("/home/transfer") do
 end
 
 get("/home/bank_account/:index/add_user") do
-    bank_account_id = session[:bank_accounts][params[:index].to_i]
+    bank_account_id = session[:bank_accounts][params[:index].to_i]["id"]
 
-    slim(:"home/bank_account/add_user", locals:{bank_account_id:bank_account_id})
+    slim(:"home/bank_account/add_user", locals:{bank_account_id: bank_account_id, index: params[:index]})
 end
 
 post("/home/bank_account/:index/add_user") do
-    bank_account_id = params[:bank_account_id]
-    email = params[:add_user_email]
+    user = $db.get_user(params[:add_user_email])
 
-    user_id = $db.get_user(email)["id"]
-
-    if user_id == nil
+    if user == nil
         session[:add_user_to_account_error] = "There are no users with that email adress in Santeo Bank"
-        redirect("/home")
+        redirect("/home/bank_account/#{params[:index]}/add_user")
+        return nil
     end
+
+    $db.add_user_to_bank_account(user["id"], params[:bank_account_id])
 
     session[:add_user_to_account_error] = ""
     redirect("/home")
@@ -170,11 +173,11 @@ post("/home/take") do
 end
 
 =begin
-get("/home/:index/pay") do
+get("/home/loan/:index/pay") do
     slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
 end 
 
-post("/home/:index/pay") do
+post("/home/loan/:index/pay") do
     slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
 end 
 =end

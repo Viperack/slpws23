@@ -11,21 +11,25 @@ post("/sign_up") do
     if username == ""
         session[:sign_up_error] = "Name must be entered to sign up"
         redirect("/sign_up")
+        return nil
     end
 
     if email == ""
         session[:sign_up_error] = "Email must be entered to sign up"
         redirect("/sign_up")
+        return nil
     end
 
     if password == ""
         session[:sign_up_error] = "Password must be entered to sign up"
         redirect("/sign_up")
+        return nil
     end
 
     if password != password_confirm
         session[:sign_up_error] = "Passwords don't match"
         redirect("/sign_up")
+        return nil
     end
 
     # Everything has been checked

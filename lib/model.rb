@@ -39,6 +39,15 @@ class Database
         end
     end
 
+    def add_user_to_bank_account(user_id, bank_account_id)
+        sql = <<-SQL
+            INSERT INTO User_bank_account_rel (user_id, bank_account_id)
+            VALUES (?, ?)
+        SQL
+
+        @db.execute(sql, user_id, bank_account_id)
+    end
+
     def add_user(name, email, password)
         password_digest = BCrypt::Password.create(password)
 
@@ -130,14 +139,11 @@ class Database
 
         @db.execute(sql, 0, name, interest, unlock_date, iban, locked)
 
-        bank_account_id = get_last_insert_id
+        bank_account_id = get_last_insert_id()
 
-        sql = <<-SQL
-            INSERT INTO User_bank_account_rel (user_id, bank_account_id)
-            VALUES (?, ?)
-        SQL
+        add_user_to_bank_account(user_id, bank_account_id)
 
-        @db.execute(sql, user_id, bank_account_id)
+        return get_last_insert_id()
     end
 
     def update_balance(bank_account_id, size)
