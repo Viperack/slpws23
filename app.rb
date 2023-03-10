@@ -54,11 +54,9 @@ before do
         session[:add_user_to_account_error] = ""
     end
 
-    if request.path_info != "/home/loan/:index/add_user"
-        session[:add_user_to_loan_error] = ""
+    if request.path_info != "/home/loan/:index/pay"
+        session[:pay_loan_error] = ""
     end
-
-
 
     unprotected_paths = ["/", "/sign_in", "/sign_up", "/debug"]
 

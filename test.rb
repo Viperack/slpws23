@@ -1,9 +1,5 @@
-require "sinatra"
+def func(**arg)
+    p arg[:test]
+end
 
-sql = <<-SQL
-SELECT *
-FROM Bank_account
-WHERE #{"id"} = ?
-SQL
-
-puts sql
+func()

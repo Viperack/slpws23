@@ -71,24 +71,26 @@ class Database
 
     # Retrievs bank accounts from the database, with or without filtering attributes.
     #
-    # @param where [String] the attributes that banks accounts need to have a matching value on to be retrieved, `"id"`, `"user_id"` or `"iban"`.
-    # @param where [String] the value of the attribute that banks accounts need to match to be retrieved.
+    # @param **arguments [Hash] 
+    # @param attribute: [String] the attributes that banks accounts need to have a matching value on to be retrieved, `"id"`, `"user_id"` or `"iban"`.
+    # @param value: [Int] the value of the attribute that banks accounts need to match to be retrieved.
     # @return [Array<Hash>] array of the retrieved bank accounts.
     def get_bank_accounts(**arguments)
-        if ["id", "iban", "user_id"].include?(arguments[:attribute]) 
-            if arguments[:attribute] == "user_id"
+        if arguments[:attribute]
+            case arguments[:attribute]
+            when "id", "iban"
+                sql = <<-SQL
+                    SELECT *
+                    FROM Bank_account
+                    WHERE #{arguments[:attribute]} = ?
+                SQL
+            when "user_id"
                 sql = <<-SQL
                     SELECT * 
                     FROM User_bank_account_rel 
                     INNER JOIN Bank_account 
                     ON User_bank_account_rel.bank_account_id = Bank_account.id 
                     WHERE user_id = ?
-                SQL
-            else
-                sql = <<-SQL
-                    SELECT *
-                    FROM Bank_account
-                    WHERE #{arguments[:attribute]} = ?
                 SQL
             end
 
@@ -240,7 +242,7 @@ class Database
                     FROM Loan
                     WHERE id = ?
                 SQL
-            when "user_id"
+            when "loan_id"
                 sql = <<-SQL
                     SELECT *
                     FROM User_loan_rel
@@ -250,7 +252,7 @@ class Database
                 SQL
             end
 
-            return @db.execute(sql, arguments[:value]) 
+            return @db.execute(sql, arguments[:value])
         end
 
         sql = <<-SQL
@@ -278,5 +280,19 @@ class Database
         SQL
     
         @db.execute(sql, user_id)
+    end
+
+    def update_loan_pay(loan_id, size)
+        if get_loans(attribute: "id", value: loan_id).first["balance"] + size < 0
+            return nil
+        end
+
+        sql = <<-SQL
+            UPDATE Bank_account
+            SET balance = balance + ?
+            WHERE id = ?
+        SQL
+
+        @db.execute(sql, size, bank_account_id)
     end
 end

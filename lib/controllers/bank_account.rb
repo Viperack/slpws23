@@ -172,15 +172,34 @@ post("/home/loan/take") do
     redirect("/home")
 end
 
-=begin
+
 get("/home/loan/:index/pay") do
-    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
+    lone_amount_remaining = get_amount_remaining(session[:loans][params[:index]]["id"])
+
+    slim(:"/home/loan/pay", locals:{bank_accounts: session[:bank_accounts], index: params[:index], lone_amount_remaining: lone_amount_remaining})
 end 
 
 post("/home/loan/:index/pay") do
-    slim(:"/home/take_loan", locals:{bank_accounts: session[:bank_accounts]})
+    if params[:loan_pay_size] > get_amount_remaining(session[:loans][params[:index]]["id"])
+        session[:pay_loan_error] = "Not enough money in bank account"
+        redirect("/home/loan/:index/pay")
+        return nil
+    end
+
+    origin_bank_account = get_bank_accounts(attribute: "id", value: params[origin_bank_account_id]).first
+
+    if update_balance(origin_bank_account, -params[:loan_pay_size]) == nil
+        session[:pay_loan_error] = "Not enough money in bank account"
+        redirect("/home/loan/:index/pay")
+        return nil
+    end
+
+
+
+
+    redirect("/home")
 end 
-=end
+
 
 get("/home/loan/:index/add_user") do
     loan_id = session[:loans][params[:index].to_i]["id"]
