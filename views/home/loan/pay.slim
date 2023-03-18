@@ -2,9 +2,9 @@
    h3 = session[:pay_loan_error]
 
 form action="/home/loan/#{index}/pay" method="POST"
-    h3 Remaining amount of loan to pay #{lone_amount_remaining}
+    h3 Remaining amount of loan to pay is $#{lone_amount_remaining}
     h3 How much of the remaining loan do you want to pay? 
-    input type="number" name="loan_pay_size" placeholder="$USD" step=".01"
+    input type="number" name="loan_payment_size" placeholder="$USD" step=".01"
 
     h3 Which of your accounts do you want the payment to be drawn from?
     select name="origin_bank_account_id"

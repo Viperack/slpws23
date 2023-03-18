@@ -174,28 +174,35 @@ end
 
 
 get("/home/loan/:index/pay") do
-    lone_amount_remaining = get_amount_remaining(session[:loans][params[:index]]["id"])
+    loan_amount_remaining = $db.get_loan_amount_remaining(session[:loans][params[:index].to_i]["id"])
 
-    slim(:"/home/loan/pay", locals:{bank_accounts: session[:bank_accounts], index: params[:index], lone_amount_remaining: lone_amount_remaining})
+    slim(:"/home/loan/pay", locals:{bank_accounts: session[:bank_accounts], index: params[:index], lone_amount_remaining: loan_amount_remaining})
 end 
 
 post("/home/loan/:index/pay") do
-    if params[:loan_pay_size] > get_amount_remaining(session[:loans][params[:index]]["id"])
-        session[:pay_loan_error] = "Not enough money in bank account"
-        redirect("/home/loan/:index/pay")
+    loan_payment_size = string_dollar_to_int_cent(params[:loan_payment_size])
+    index = params[:index].to_i
+
+    puts "DEBUG:"
+    p loan_payment_size 
+    p $db.get_loan_amount_remaining(session[:loans][index]["id"])
+
+    if loan_payment_size > $db.get_loan_amount_remaining(session[:loans][index]["id"])
+        session[:pay_loan_error] = "Can't more than the size of the loan"
+        redirect("/home/loan/#{index}/pay")
         return nil
     end
 
-    origin_bank_account = get_bank_accounts(attribute: "id", value: params[origin_bank_account_id]).first
+    origin_bank_account = $db.get_bank_accounts(attribute: "id", value: params[:origin_bank_account_id]).first
 
-    if update_balance(origin_bank_account, -params[:loan_pay_size]) == nil
+    if $db.update_balance(origin_bank_account, -loan_payment_size) == nil
         session[:pay_loan_error] = "Not enough money in bank account"
-        redirect("/home/loan/:index/pay")
+        redirect("/home/loan/#{index}/pay")
         return nil
     end
+    $db.update_loan_payment(session[:loans][index]["id"], loan_payment_size)
 
-
-
+    $db.add_transaction_log(session[:user_data]["id"], -2, loan_payment_size, Time.now.to_i)
 
     redirect("/home")
 end 

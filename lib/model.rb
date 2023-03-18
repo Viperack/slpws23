@@ -1,24 +1,129 @@
-require "sinatra"
-require "slim"
-require "sqlite3"
 require "bcrypt"
-require "sinatra/reloader"
+require "sqlite3"
+require "sinatra"
+
+require_relative "entites/user"
+require_relative "entites/bank_account"
+require_relative "entites/loan"
+require_relative "entites/loan_invite"
+require_relative "entites/interest"
+
+
 
 class Database
     def initialize(path)
         @db = SQLite3::Database.new(path)
         @db.results_as_hash = true
     end
+    def add_user(name, email, password)
+      password_digest = BCrypt::Password.create(password)
 
-    def int_to_string(int, string_length)
-        string = int.to_s
+      sql = <<-SQL
+            INSERT INTO User (name, email, password) 
+            VALUES (?, ?, ?)
+      SQL
 
-        for i in 0...(string_length-string.length)
-            string = "0" + string
+      @db.execute(sql, name, email, password_digest)
+    end
+
+    def get_user()
+        sql = <<-SQL
+            SELECT *
+            FROM User 
+            WHERE email = ?
+        SQL
+
+        user_hash = @db.execute(sql, email).first
+
+        User.create_from_hash(user_hash)
+    end
+
+    def generate_iban()
+        bban_num = Random.rand(100000000)
+        bban = "GB" + bban_num.digits.sum.to_s + int_to_string(bban_num, 8)
+
+        while get_bank_accounts(attribute: "iban", value: iban).length != 0
+          bban_num = Random.rand(100000000)
+          iban = "GB" + bban.digits.sum.to_s + int_to_string(bban, 8)
         end
 
-        return string
+        iban
     end
+
+    def int_to_string(int, string_length)
+      string = int.to_s
+
+      for i in 0...(string_length-string.length)
+        string = "0" + string
+      end
+
+      string
+    end
+
+    def add_bank_account(user_id, interest, unlock_date, name, locked)
+
+
+        sql = <<-SQL
+            INSERT INTO Bank_account (balance, name, interest, unlock_date, iban, locked)
+            VALUES (?, ?, ?, ?, ?, ?)
+        SQL
+
+        @db.execute(sql, 0, name, interest, unlock_date, iban, locked)
+
+        bank_account_id = get_last_insert_id()
+
+        add_user_to_bank_account(user_id, bank_account_id)
+
+        bank_account_id
+    end
+
+    def get_bank_accounts()
+
+    end
+
+    def update_bank_account()
+
+    end
+
+    def delete_bank_account()
+
+    end
+
+    def add_loan()
+
+    end
+
+    def get_loans()
+
+    end
+
+    def update_loan()
+
+    end
+
+    def delete_loan()
+
+    end
+
+    def get_interests()
+
+    end
+
+    def add_loan_invite()
+
+    end
+
+    def get_loan_invites()
+
+    end
+
+    def delete_loan_invites()
+
+    end
+
+
+
+=begin
 
     def get_last_insert_id()
         sql = <<-SQL
@@ -48,27 +153,6 @@ class Database
         @db.execute(sql, user_id, bank_account_id)
     end
 
-    def add_user(name, email, password)
-        password_digest = BCrypt::Password.create(password)
-
-        sql = <<-SQL
-            INSERT INTO User (name, email, password) 
-            VALUES (?, ?, ?)
-        SQL
-
-        @db.execute(sql, name, email, password_digest)
-    end
-
-    def get_user(email)
-        sql = <<-SQL
-            SELECT *
-            FROM User 
-            WHERE email = ?
-        SQL
-
-        @db.execute(sql, email).first
-    end
-
     # Retrievs bank accounts from the database, with or without filtering attributes.
     #
     # @param **arguments [Hash] 
@@ -94,6 +178,10 @@ class Database
                 SQL
             end
 
+            puts "DEBUG:"
+            p sql
+            puts "SPACE"
+            p arguments[:value]
             return @db.execute(sql, arguments[:value])
         end
 
@@ -121,33 +209,6 @@ class Database
         return response.first["id"]
     end
 
-    def add_bank_account(user_id, interest, unlock_date, name, locked)
-        bban = Random.rand(100000000)
-        bban_string = "GB" + bban.digits.sum.to_s + int_to_string(bban, 8)
-
-        while get_bank_accounts(attribute: "iban", value: bban_string).length != 0
-            bban = Random.rand(100000000)
-            bban_string = "GB" + bban.digits.sum.to_s + int_to_string(bban, 8)
-            puts bban_string
-            p get_bank_accounts(attribute: "iban", value: bban_string).length
-        end
-
-        iban = bban_string
-
-        sql = <<-SQL
-            INSERT INTO Bank_account (balance, name, interest, unlock_date, iban, locked)
-            VALUES (?, ?, ?, ?, ?, ?)
-        SQL
-
-        @db.execute(sql, 0, name, interest, unlock_date, iban, locked)
-
-        bank_account_id = get_last_insert_id()
-
-        add_user_to_bank_account(user_id, bank_account_id)
-
-        return bank_account_id
-    end
-
     def update_balance(bank_account_id, size)
         if get_bank_accounts(attribute: "id", value: bank_account_id).first["balance"] + size < 0
             return nil
@@ -164,15 +225,15 @@ class Database
 
     def close_bank_account(bank_account_id)
         sql = <<-SQL
-            DELETE FROM Bank_account
-            WHERE id = ?
+            DELETE FROM User_bank_account_rel
+            WHERE bank_account_id = ?
         SQL
 
         @db.execute(sql, bank_account_id)
 
         sql = <<-SQL
-            DELETE FROM User_bank_account_rel
-            WHERE bank_account_id = ?
+            DELETE FROM Bank_account
+            WHERE id = ?
         SQL
 
         @db.execute(sql, bank_account_id)
@@ -242,7 +303,7 @@ class Database
                     FROM Loan
                     WHERE id = ?
                 SQL
-            when "loan_id"
+            when "user_id"
                 sql = <<-SQL
                     SELECT *
                     FROM User_loan_rel
@@ -282,17 +343,50 @@ class Database
         @db.execute(sql, user_id)
     end
 
-    def update_loan_pay(loan_id, size)
+    def delete_loan(loan_id)
+        sql = <<-SQL
+            DELETE FROM User_loan_rel
+            WHERE loan_id = ?
+        SQL
+
+        @db.execute(sql, loan_id)
+
+        sql = <<-SQL
+            DELETE FROM Loan
+            WHERE id = ?
+        SQL
+
+        @db.execute(sql, loan_id)
+    end
+
+    def loan_fully_paid?(loan_id)
+        loan = get_loans(attribute: "id", value: loan_id)
+
+        return loan["amount_payed"] >= loan["size"]
+    end
+
+    def update_loan_payment(loan_id, size)
         if get_loans(attribute: "id", value: loan_id).first["balance"] + size < 0
             return nil
         end
 
         sql = <<-SQL
-            UPDATE Bank_account
-            SET balance = balance + ?
+            UPDATE Loan
+            SET amount_payed = amount_payed + ?
             WHERE id = ?
         SQL
 
         @db.execute(sql, size, bank_account_id)
+
+        if loan_fully_paid?(loan_id)
+            delete_loan(loan_id)
+        end
     end
+
+    def get_loan_amount_remaining(loan_id)
+      loan = $db.get_loans(attribute: "id", value: loan_id).first
+
+      return loan["size"] - loan["amount_payed"]
+    end
+=end
 end

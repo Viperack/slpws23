@@ -1,5 +1,11 @@
-def func(**arg)
-    p arg[:test]
+def func()
+  i = 0
+  while i < 5
+      i += 1
+      test = "TRUE"
+  end
+
+  test
 end
 
-func()
+p func()
