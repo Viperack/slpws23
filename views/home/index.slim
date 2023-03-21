@@ -1,24 +1,24 @@
-h2 = "Welcome #{session[:user_data]["name"]}!"
+h2 = "Welcome #{session[:user]["name"]}!"
 a href="/home/deposit" Deposit
 a href="/home/transfer" Transfer
 
 h2 Bank accounts
 - for i in 0...bank_accounts.length 
-    h3 #{bank_accounts[i]["name"]}
-    p IBAN: #{display_iban(bank_accounts[i]["iban"])}
-    p Balance: $#{display_balance(bank_accounts[i]["balance"])}
-    - if bank_accounts[i]["locked"] == 1
-        p Unlock date: #{epoch_to_date(bank_accounts[i]["unlock_date"])}
-        p Interest rate: #{display_balance(bank_accounts[i]["interest"])}%
+    h3 #{bank_accounts[i].name}
+    p IBAN: #{display_iban(bank_accounts[i].iban)}
+    p Balance: $#{display_balance(bank_accounts[i].balance)}
+    - if bank_accounts[i].locked == 1
+        p Unlock date: #{epoch_to_date(bank_accounts[i].unlock_date)}
+        p Interest rate: #{display_balance(bank_accounts[i].interest)}%
     a href="/home/bank_account/#{i}/close" Close bank account
     a href="/home/bank_account/#{i}/add_user" Add user to bank account
 
 h2 Loans
 - for i in 0...(loans.length-1)
-    p Size: $#{display_balance(loans[i]["size"])}
-    p Remaining: $#{display_balance(loans[i]["size"] - loans[i]["amount_payed"])}
-    - puts "Start date #{loans[i]["start_time"]}"
-    p Start date: #{epoch_to_date(loans[i]["start_time"])}
-    p Interest rate: #{display_balance(loans[i]["interest"])}%
+    p Size: $#{display_balance(loans[i].size)}
+    p Remaining: $#{display_balance(loans[i].size - loans[i].amount_payed)}
+    - puts "Start date #{loans[i].start_time}"
+    p Start date: #{epoch_to_date(loans[i].start_time)}
+    p Interest rate: #{display_balance(loans[i].interest)}%
     a href="/home/loan/#{i}/pay" Pay loan
     a href="/home/loan/#{i}/add_user" Add user to loan

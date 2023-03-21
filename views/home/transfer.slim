@@ -7,13 +7,13 @@ form action="/home/transfer" method="POST"
 
     h3 Which of your accounts do you want to transfer money from?
     select name="origin_bank_account_id"
-        - for bank_account in bank_accounts
+        - for bank_account in session[:bank_accounts]
             - if bank_account["locked"] == 0
                 option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
 
     h3 Which of your accounts do you want to transfer money to?
     select name="destination_bank_account_id"
-        - for bank_account in bank_accounts
+        - for bank_account in session[:bank_accounts]
             - if bank_account["locked"] == 0
                 option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
         option value="IBAN" IBAN
