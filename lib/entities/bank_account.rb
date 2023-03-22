@@ -1,4 +1,6 @@
 class Bank_account
+  attr_reader :id, :name, :iban, :balance, :interest, :unlock_date, :locked
+
   def initialize(bank_account_as_hash)
     @id = bank_account_as_hash["id"]
     @name = bank_account_as_hash["name"]

@@ -29,8 +29,8 @@ class Database
     password_digest = BCrypt::Password.create(password)
 
     sql = <<-SQL
-            INSERT INTO User (name, email, password_digest, permission_level) 
-            VALUES (?, ?, ?, ?)
+      INSERT INTO User (name, email, password_digest, permission_level) 
+      VALUES (?, ?, ?, ?)
     SQL
 
     @db.execute(sql, name, email, password_digest, permission_level)
@@ -39,21 +39,19 @@ class Database
   def get_users(**attributes)
     if attributes[:email]
       sql = <<-SQL
-            SELECT *
-            FROM User 
-            WHERE email = ?
+        SELECT *
+        FROM User 
+        WHERE email = ?
       SQL
 
-      user_hash = @db.execute(sql, attributes[:email]).first
-
-      return User.new(user_hash)
+      user_hashes = @db.execute(sql, attributes[:email])
     end
 
     if attributes[:bank_account_id]
       sql = <<-SQL
-            SELECT *
-            FROM User_bank_account_rel
-            WHERE bank_account_id = ?
+        SELECT *
+        FROM User_bank_account_rel
+        WHERE bank_account_id = ?
       SQL
 
       user_hashes = @db.execute(sql, attributes[:bank_account_id])
@@ -61,9 +59,9 @@ class Database
 
     if attributes[:loan_id]
       sql = <<-SQL
-            SELECT *
-            FROM User_loan_rel
-            WHERE loan_id = ?
+        SELECT *
+        FROM User_loan_rel
+        WHERE loan_id = ?
       SQL
 
       user_hashes = @db.execute(sql, attributes[:loan_id])
@@ -73,7 +71,7 @@ class Database
       return Array.new(user_hashes.length) { |i| User.new(user_hashes[i]) }
     end
 
-    nil
+    []
   end
 
   #@todo def update_user()
@@ -83,8 +81,8 @@ class Database
   # User_bank_account_rel
   def create_user_bank_account_rel(user_id, bank_account_id)
     sql = <<-SQL
-            INSERT INTO User_bank_account_rel (user_id, bank_account_id)
-            VALUES (?, ?)
+      INSERT INTO User_bank_account_rel (user_id, bank_account_id)
+      VALUES (?, ?)
     SQL
 
     @db.execute(sql, user_id, bank_account_id)
@@ -93,8 +91,8 @@ class Database
   def delete_user_bank_account_rel(**attributes)
     if attributes[:user_id]
       sql = <<-SQL
-      DELETE FROM User_bank_account_rel
-      WHERE user_id = ?
+        DELETE FROM User_bank_account_rel
+        WHERE user_id = ?
       SQL
 
       return @db.execute(sql, attributes[:user_id])
@@ -102,8 +100,8 @@ class Database
 
     if attributes[:bank_account_id]
       sql = <<-SQL
-      DELETE FROM User_bank_account_rel
-      WHERE bank_account_id = ?
+        DELETE FROM User_bank_account_rel
+        WHERE bank_account_id = ?
       SQL
 
       return @db.execute(sql, attributes[:bank_account_id])
@@ -135,7 +133,7 @@ class Database
 
   def get_last_insert_id
     sql = <<-SQL
-            SELECT last_insert_rowid()
+      SELECT last_insert_rowid()
     SQL
 
     @db.execute(sql).first["last_insert_rowid()"]
@@ -145,8 +143,8 @@ class Database
     iban = generate_iban
 
     sql = <<-SQL
-            INSERT INTO Bank_account (balance, name, interest, unlock_date, iban, locked)
-            VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO Bank_account (balance, name, interest, unlock_date, iban, locked)
+      VALUES (?, ?, ?, ?, ?, ?)
     SQL
 
     @db.execute(sql, 0, name, interest, unlock_date, iban, locked)
@@ -169,25 +167,25 @@ class Database
       case arguments[:attribute]
       when "id", "iban"
         sql = <<-SQL
-                    SELECT *
-                    FROM Bank_account
-                    WHERE #{arguments[:attribute]} = ?
+          SELECT *
+          FROM Bank_account
+          WHERE #{arguments[:attribute]} = ?
         SQL
       when "user_id"
         sql = <<-SQL
-                    SELECT * 
-                    FROM User_bank_account_rel 
-                    INNER JOIN Bank_account 
-                    ON User_bank_account_rel.bank_account_id = Bank_account.id 
-                    WHERE user_id = ?
+          SELECT * 
+          FROM User_bank_account_rel 
+          INNER JOIN Bank_account 
+          ON User_bank_account_rel.bank_account_id = Bank_account.id 
+          WHERE user_id = ?
         SQL
       end
 
       bank_accounts_as_hash = @db.execute(sql, arguments[:value])
     else
       sql = <<-SQL
-            SELECT *
-            FROM Bank_account
+        SELECT *
+        FROM Bank_account
       SQL
 
       bank_accounts_as_hash = @db.execute(sql)
@@ -209,9 +207,9 @@ class Database
       return -1 if negative_sum?(attributes[:id], attributes[:balance])
 
       sql = <<-SQL
-          UPDATE Bank_account
-          SET balance = balance + ?, locked = ?
-          WHERE id = ?
+        UPDATE Bank_account
+        SET balance = balance + ?, locked = ?
+        WHERE id = ?
       SQL
 
       return @db.execute(sql, attributes[:balance], attributes[:locked], attributes[:id])
@@ -231,9 +229,9 @@ class Database
 
     if attributes[:locked]
       sql = <<-SQL
-          UPDATE Bank_account
-          SET locked = ?
-          WHERE id = ?
+        UPDATE Bank_account
+        SET locked = ?
+        WHERE id = ?
       SQL
 
       return @db.execute(sql, attributes[:locked], attributes[:id])
@@ -261,8 +259,8 @@ class Database
   # User_loan_rel
   def create_user_loan_rel(user_id, loan_id)
     sql = <<-SQL
-            INSERT INTO User_loan_rel (user_id, loan_id)
-            VALUES (?, ?)
+      INSERT INTO User_loan_rel (user_id, loan_id)
+      VALUES (?, ?)
     SQL
 
     @db.execute(sql, user_id, loan_id)
@@ -271,8 +269,8 @@ class Database
   def delete_user_loan_rel(**attributes)
     if attributes[:user_id]
       sql = <<-SQL
-      DELETE FROM User_loan_rel
-      WHERE user_id = ?
+        DELETE FROM User_loan_rel
+        WHERE user_id = ?
       SQL
 
       return @db.execute(sql, attributes[:user_id])
@@ -280,8 +278,8 @@ class Database
 
     if attributes[:loan_id]
       sql = <<-SQL
-      DELETE FROM User_loan_rel
-      WHERE loan_id = ?
+        DELETE FROM User_loan_rel
+        WHERE loan_id = ?
       SQL
 
       return @db.execute(sql, attributes[:loan_id])
@@ -293,9 +291,9 @@ class Database
   # Interest
   def get_interest(type)
     sql = <<-SQL
-            SELECT *
-            FROM Interest
-            WHERE type = ?
+      SELECT *
+      FROM Interest
+      WHERE type = ?
     SQL
 
     interests_as_hash = @db.execute(sql, type)
@@ -308,8 +306,8 @@ class Database
   # Loan
   def create_loan(user_id, loan_size)
     sql = <<-SQL
-            INSERT INTO Loan (size, amount_payed, start_time, interest)
-            VALUES (?, ?, ?, ?)
+      INSERT INTO Loan (size, amount_payed, start_time, interest)
+      VALUES (?, ?, ?, ?)
     SQL
 
     rate = get_interest("Loan").first.rate
@@ -328,25 +326,25 @@ class Database
       case arguments[:attribute]
       when "id"
         sql = <<-SQL
-                    SELECT *
-                    FROM Loan
-                    WHERE id = ?
+          SELECT *
+          FROM Loan
+          WHERE id = ?
         SQL
       when "user_id"
         sql = <<-SQL
-                    SELECT *
-                    FROM User_loan_rel
-                    INNER JOIN Loan
-                    ON User_loan_rel.loan_id = Loan.id
-                    WHERE user_id = ?
+          SELECT *
+          FROM User_loan_rel
+          INNER JOIN Loan
+          ON User_loan_rel.loan_id = Loan.id
+          WHERE user_id = ?
         SQL
       end
 
       loans_as_hashes = @db.execute(sql, arguments[:value])
     else
       sql = <<-SQL
-            SELECT *
-            FROM Loan
+        SELECT *
+        FROM Loan
       SQL
 
       loans_as_hashes = @db.execute(sql)
@@ -367,9 +365,9 @@ class Database
     end
 
     sql = <<-SQL
-            UPDATE Loan
-            SET amount_payed = amount_payed + ?
-            WHERE id = ?
+      UPDATE Loan
+      SET amount_payed = amount_payed + ?
+      WHERE id = ?
     SQL
 
     @db.execute(sql, size, loan_id)
@@ -381,15 +379,15 @@ class Database
 
   def delete_loan(loan_id)
     sql = <<-SQL
-            DELETE FROM User_loan_rel
-            WHERE loan_id = ?
+      DELETE FROM User_loan_rel
+      WHERE loan_id = ?
     SQL
 
     @db.execute(sql, loan_id)
 
     sql = <<-SQL
-            DELETE FROM Loan
-            WHERE id = ?
+      DELETE FROM Loan
+      WHERE id = ?
     SQL
 
     @db.execute(sql, loan_id)
@@ -399,8 +397,8 @@ class Database
 
   def create_loan_invite(user_id, loan_id)
     sql = <<-SQL
-            INSERT INTO Loan_invite (user_id, loan_id)
-            VALUES (?, ?)
+      INSERT INTO Loan_invite (user_id, loan_id)
+      VALUES (?, ?)
     SQL
 
     @db.execute(sql, user_id, loan_id)
@@ -408,9 +406,9 @@ class Database
 
   def get_loan_invites(user_id)
     sql = <<-SQL
-            SELECT *
-            FROM Loan_invite
-            WHERE user_id = ?
+      SELECT *
+      FROM Loan_invite
+      WHERE user_id = ?
     SQL
 
     loan_invites_as_hash = @db.execute(sql, user_id)
@@ -421,8 +419,8 @@ class Database
   # Transaction
   def create_transaction_log(sender_id, receiver_id, size, time)
     sql = <<-SQL
-            INSERT INTO Transactions (sender_id, receiver_id, size, time)
-            VALUES (?, ?, ?, ?)
+      INSERT INTO Transactions (sender_id, receiver_id, size, time)
+      VALUES (?, ?, ?, ?)
     SQL
 
     @db.execute(sql, sender_id, receiver_id, size, time)

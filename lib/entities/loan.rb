@@ -1,4 +1,6 @@
 class Loan
+  attr_reader :id, :size, :amount_payed, :start_time, :interest
+
   def initialize(loan_as_hash)
     @id = loan_as_hash["id"]
     @size = loan_as_hash["size"]

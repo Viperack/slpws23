@@ -1,9 +1,9 @@
 get("/") do
   # Restet database
-  # $db.wipe_all()
+  # $db.reset_database
 
   # For debugging
-  redirect("/debug")
+  # redirect("/debug")
 
   slim(:index)
 end
@@ -26,8 +26,7 @@ post("/sign_in") do
     return nil
   end
 
-  user_as_hash = $db.get_users(email: params["email"]).first
-  user = User.new(user_as_hash)
+  user = $db.get_users(email: params["email"]).first
 
   if !user
     session[:sign_in_error] = "No user with that email adress exist"
@@ -53,7 +52,7 @@ end
 
 get("/debug") do
   email = "theok04@gmail.com"
-  password = "1"
+  password = 1
 
   if email == ""
     session[:sign_in_error] = "Email must be entered to sign in"
@@ -67,17 +66,18 @@ get("/debug") do
     return nil
   end
 
-  user_exists = $db.get_user(email) != nil
+  user = $db.get_users(email: email).first
 
-  if !user_exists
+  # puts user.password_digest
+  # puts password
+
+  if !user
     session[:sign_in_error] = "No user with that email adress exist"
     redirect("sign_in")
     return nil
   end
 
-  user = $db.get_user(email)
-
-  if BCrypt::Password.new(user["password"]) != password
+  if BCrypt::Password.new(user.password_digest) != password
     session[:sign_in_error] = "Wrong combinations of email and password"
     redirect("sign_in")
     return nil

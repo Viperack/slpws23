@@ -1,4 +1,6 @@
 class Transaction
+  attr_reader :id, :sender_id, :receiver_id, :size, :time
+
   def initialize(transaction_as_hash)
     @id = transaction_as_hash["id"]
     @sender_id = transaction_as_hash["sender_id"]

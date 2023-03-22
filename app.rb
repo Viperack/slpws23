@@ -13,19 +13,18 @@ enable :sessions
 
 Thread.new do
   while true
-    bank_accounts = $db.get_bank_accounts()
+    bank_accounts = $db.get_bank_accounts
     time = Time.now.to_i
 
-    for bank_account in bank_accounts
-      if bank_account["interest"] == 1 && bank_account["unlock_date"] <= time
-        interest = (bank_account["balance"] * (bank_account["interest"] / 10000.0)).ceil(2)
+    bank_accounts.each { |bank_account|
+      if bank_account.interest == 1 && bank_account.unlock_date <= time
+        interest = (bank_account.balance * (bank_account.interest / 10000.0)).ceil(2)
 
-        $db.update_balance(bank_account["id"], interest)
-        $db.update_lock(bank_account["id"], 0)
+        $db.update_bank_account(id: bank_account.id, balance: interest, locked: 0)
 
-        $db.add_transaction_log(-2, bank_account["id"], interest, Time.now.to_i)
+        $db.create_transaction_log(-2, bank_account.id, interest, Time.now.to_i)
       end
-    end
+    }
 
     sleep(60)
   end
@@ -56,7 +55,7 @@ before do
     session[:pay_loan_error] = ""
   end
 
-  unprotected_paths = ["/", "/sign_in", "/sign_up", "/debug"]
+  unprotected_paths = %w[/ /sign_in /sign_up /debug]
 
   if !unprotected_paths.include?(request.path_info) && !session[:user]
     redirect("/")

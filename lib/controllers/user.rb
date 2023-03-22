@@ -3,41 +3,34 @@ get("/sign_up") do
 end
 
 post("/sign_up") do
-  username = params["name"]
-  email = params["email"]
-  password = params["password"]
-  password_confirm = params["password_confirm"]
-
-  if username == ""
+  if params["name"] == ""
     session[:sign_up_error] = "Name must be entered to sign up"
     redirect("/sign_up")
     return nil
   end
 
-  if email == ""
+  if params["email"] == ""
     session[:sign_up_error] = "Email must be entered to sign up"
     redirect("/sign_up")
     return nil
   end
 
-  if password == ""
+  if params["password"] == ""
     session[:sign_up_error] = "Password must be entered to sign up"
     redirect("/sign_up")
     return nil
   end
 
-  if password != password_confirm
+  if params["password"] != params["password_confirm"]
     session[:sign_up_error] = "Passwords don't match"
     redirect("/sign_up")
     return nil
   end
 
   # Everything has been checked
-  $db.add_user(username, email, password)
+  $db.create_user(params["name"], params["email"], params["password"], 0)
 
-  user = $db.get_user(email)
-
-  session[:user] = user
+  session[:user] = $db.get_users(email: params["email"]).first
 
   redirect("/home")
 end

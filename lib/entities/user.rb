@@ -1,4 +1,5 @@
 class User
+  attr_reader :id, :name, :email, :password_digest, :permission_level
   def initialize(user_as_hash)
     @id = user_as_hash["id"]
     @name = user_as_hash["name"]

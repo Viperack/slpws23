@@ -1,4 +1,6 @@
 class Interest
+  attr_reader :id, :rate, :time_deposit, :time_deposit, :type
+
   def initialize(interest_as_hash)
     @id = interest_as_hash["id"]
     @rate = interest_as_hash["rate"]

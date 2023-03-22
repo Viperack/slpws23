@@ -6,20 +6,20 @@ html lang="en"
     meta http-equiv="X-UA-Compatible" content="ie=edge"/
     title Santeo Bank
   body
-    header 
+    header
       h1 Santeo Bank
 
     nav
-      - if session[:user_rank] == "guest"
-          a href="/sign_in" Sign in
-          a href="/sign_up" Open user account
-      - elsif session[:user_rank] == "user"
-          a href="/home/bank_account/open" Open bank account
-          a href="/home/loan/take" Take loan
-          a href="/sign_out" Sign out
-      - elsif session[:user_rank] == "admin"
+      - if !session[:user]
+        a href="/sign_in" Sign in
+        a href="/sign_up" Open user account
+      - elsif session[:user]
+        a href="/home/bank_account/open" Open bank account
+        a href="/home/loan/take" Take loan
+        a href="/sign_out" Sign out
+      - elsif session[:user].permission_level == 1
+        a href="/" ADMIN
 
-      
-  
-    ==yield
+
+    == yield
   
