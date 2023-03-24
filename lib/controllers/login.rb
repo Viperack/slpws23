@@ -4,6 +4,9 @@ get("/") do
 
   # For debugging
   # redirect("/debug")
+  # var = $db.create_user_bank_account_rel(3, 4)
+  # puts "DEBUG"
+  # puts var
 
   slim(:index)
 end

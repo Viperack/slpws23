@@ -20,6 +20,6 @@ form action="/home/bank_account/open/savings" method="POST"
     select name="time_deposit"
         - for interest in interests
             - if interest.type == "Savings"
-                option value="#{interest.time_deposit},#{interest.interest}" #{interest.time_deposit} Years (#{display_balance(interest.rates)}%)
+                option value="#{interest.time_deposit},#{interest.rate}" #{interest.time_deposit} Years (#{display_balance(interest.rate)}%)
 
     input type="submit" value="Submit"
