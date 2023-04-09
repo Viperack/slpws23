@@ -32,5 +32,9 @@ post("/sign_up") do
 
   session[:user] = $db.get_users(email: params["email"]).first
 
-  redirect("/home")
+  if session[:user].permission_level == 0
+    redirect("/home")
+  elsif session[:user].permission_level == 1
+    redirect("/transaction")
+  end
 end

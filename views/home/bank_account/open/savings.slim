@@ -1,6 +1,6 @@
 h3 Savings account
 
-- if session[:savings_account_create_error] != "" 
+- if session[:savings_account_create_error]
    h3 = session[:savings_account_create_error]
 
 form action="/home/bank_account/open/savings" method="POST"
@@ -13,13 +13,13 @@ form action="/home/bank_account/open/savings" method="POST"
     select name="origin_bank_account_id"
         - for bank_account in session[:bank_accounts]
             - if bank_account.locked == 0
-                option value="#{bank_account.id}" #{bank_account.name} ($#{display_balance(bank_account.balance)})
+                option value="#{bank_account.id}" #{bank_account.name} ($#{display_dollars(bank_account.balance)})
         option value="deposit" Deposit
     
     h3 For how long do you want the bank account to be locked for?
     select name="time_deposit"
         - for interest in interests
             - if interest.type == "Savings"
-                option value="#{interest.time_deposit},#{interest.rate}" #{interest.time_deposit} Years (#{display_balance(interest.rate)}%)
+                option value="#{interest.time_deposit},#{interest.rate}" #{interest.time_deposit} Years (#{display_dollars(interest.rate)}%)
 
     input type="submit" value="Submit"

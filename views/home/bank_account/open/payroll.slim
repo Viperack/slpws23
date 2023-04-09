@@ -1,6 +1,6 @@
 h3 Payroll account
 
-- if session[:payroll_account_create_error] != "" 
+- if session[:payroll_account_create_error]
    h3 = session[:payroll_account_create_error]
 
 form action="/home/bank_account/open/payroll" method="POST"

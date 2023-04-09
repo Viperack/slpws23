@@ -1,11 +1,14 @@
-form action="/home/deposit" method="POST"
-    h3 How much money do you want to deposit?
-    input type="number" name="deposit_size" placeholder="$USD" step=".01"
+- if session[:bank_accounts].select {|bank_account| bank_account.locked == 0}.length < 1
+    h3 You don't have any bank accounts to deposit into
+- else
+    form action="/home/deposit" method="POST"
+        h3 How much money do you want to deposit?
+        input type="number" name="deposit_size" placeholder="$USD" step=".01"
 
-    h3 Which account do you want to deposit money into?
-    select name="destination_bank_account_id"
-        - for bank_account in session[:bank_accounts]
-            - if bank_account.locked == 0
-                option value="#{bank_account.id}" #{bank_account.name} ($#{display_balance(bank_account.balance)})
+        h3 Which account do you want to deposit money into?
+        select name="destination_bank_account_id"
+            - for bank_account in session[:bank_accounts]
+                - if bank_account.locked == 0
+                    option value="#{bank_account.id}" #{bank_account.name} ($#{display_dollars(bank_account.balance)})
 
-    input type="submit" value="Submit"
+        input type="submit" value="Submit"

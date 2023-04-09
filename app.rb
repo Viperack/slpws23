@@ -14,6 +14,7 @@ enable :sessions
 Thread.new do
   while true
     bank_accounts = $db.get_bank_accounts
+    loans = $db.get_loans
     time = Time.now.to_i
 
     bank_accounts.each { |bank_account|
@@ -26,33 +27,44 @@ Thread.new do
       end
     }
 
+    loans.each { |loan|
+      if loan.interest_payment_date <= time
+        interest = (loan.size * (loan.interest / 10000.0)).ceil(2)
+
+        $db.update_loan(id: loan.id, size: interest)
+
+        $db.create_transaction_log(-2, loan.id, interest, Time.now.to_i)
+      end
+    }
+
+
     sleep(60)
   end
 end
 
 before do
   if request.path_info != "/sign_in"
-    session[:sign_in_error] = ""
+    session[:sign_in_error] = nil
   end
 
   if request.path_info != "/sign_up"
-    session[:sign_up_error] = ""
+    session[:sign_up_error] = nil
   end
 
   if request.path_info != "/home/bank_account/open/savings"
-    session[:savings_account_create_error] = ""
+    session[:savings_account_create_error] = nil
   end
 
   if request.path_info != "/home/transfer"
-    session[:transfer_error] = ""
+    session[:transfer_error] = nil
   end
 
-  if request.path_info != "/home/bank_account/:index/add_user"
-    session[:add_user_to_account_error] = ""
+  if (request.path_info =~ /\/home\/bank_account\/\d+\/add_user/) == nil
+    session[:add_user_to_account_error] = nil
   end
 
-  if request.path_info != "/home/loan/:index/pay"
-    session[:pay_loan_error] = ""
+  if (request.path_info =~ /\/home\/loan\/\d+\/pay/) == nil
+    session[:pay_loan_error] = nil
   end
 
   unprotected_paths = %w[/ /sign_in /sign_up /debug]
@@ -63,7 +75,7 @@ before do
 end
 
 helpers do
-  def display_balance(balance)
+  def display_dollars(balance)
     (balance / 100.0).round(2)
   end
 
@@ -79,12 +91,25 @@ helpers do
   end
 
   def string_dollar_to_int_cent(string_dollar)
-    (string_dollar.to_f * 100).to_i
+    dollar_cent_array = string_dollar.split(".", 2).map { |element| element.to_i }
+
+    cent = dollar_cent_array[0] * 100 + (dollar_cent_array[1] == nil ? 0 : dollar_cent_array[1])
   end
 
   def get_loan_rest(loan_id)
-    loan = $db.get_loans(attribute: "id", value: loan_id).first
+    loan = $db.get_loans(id: loan_id).first
 
-    return loan["size"] - loan["amount_payed"]
+    return loan.size - loan.amount_payed
   end
+
+  def display_users_from_array(user_array)
+    string = ""
+
+    (0...(user_array.length - 1)).each { |i|
+      string += "#{user_array[i].email} (#{user_array[i].name}), "
+    }
+
+    return string + "#{user_array[user_array.length-1].email} (#{user_array[user_array.length-1].name})"
+  end
+
 end

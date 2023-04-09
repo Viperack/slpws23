@@ -1,0 +1,8 @@
+form action="/interest/#{interest.id}/update" method="POST"
+  h3 What do you want the interest rate to be
+  input type="number" name="rate" placeholder="#{display_dollars(interest.rate)}%" step=".01"
+
+  h3 How many years do you want the time deposit to be
+  input type="number" name="time_deposit" placeholder="#{interest.time_deposit}" step="1"
+
+  input type="submit" value="Submit"

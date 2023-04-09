@@ -1,12 +1,15 @@
-form action="/home/loan/take" method="POST"
-    h3 The current interest rate is #{display_balance(rate)}%
-    h3 How much money do you want loan?
-    input type="number" name="loan_size" placeholder="$USD" step=".01"
+- if session[:bank_accounts].select {|bank_account| bank_account.locked == 0}.length < 1
+    h3 You need an unlocked bank account in order to take a loan
+- else
+    form action="/home/loan/take" method="POST"
+        h3 The current interest rate is #{display_dollars(rate)}%
+        h3 How much money do you want loan?
+        input type="number" name="loan_size" placeholder="$USD" step=".01"
 
-    h3 In which account do you want the money?
-    select name="destination_bank_account_id"
-        - for bank_account in session[:bank_accounts]
-            - if bank_account["locked"] == 0
-                option value="#{bank_account["id"]}" #{bank_account["name"]} ($#{display_balance(bank_account["balance"])})
+        h3 In which account do you want the money?
+        select name="destination_bank_account_id"
+            - for bank_account in session[:bank_accounts]
+                - if bank_account.locked == 0
+                    option value="#{bank_account.id}" #{bank_account.name} ($#{display_dollars(bank_account.balance)})
 
-    input type="submit" value="Submit"
+        input type="submit" value="Submit"

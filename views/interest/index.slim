@@ -1,0 +1,12 @@
+table
+  tr
+    th Interest rate
+    th Time deposit
+    th Type
+  - for interest in interests
+    tr
+      td #{display_dollars(interest.rate)}%
+      td #{interest.time_deposit} Years
+      td #{interest.type}
+      td
+        a href="/interest/#{interest.id}/update" Update

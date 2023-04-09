@@ -11,14 +11,19 @@ html lang="en"
 
     nav
       - if !session[:user]
+        a href="/" Start
         a href="/sign_in" Sign in
-        a href="/sign_up" Open user account
+        a href="/sign_up" Sign up
+      - elsif session[:user].permission_level == 1
+        a href="/transaction" Transaction logs
+        a href="/interest" Interests
+        a href="/sign_out" Sign out
       - elsif session[:user]
+        a href="/home" Home
         a href="/home/bank_account/open" Open bank account
         a href="/home/loan/take" Take loan
         a href="/sign_out" Sign out
-      - elsif session[:user].permission_level == 1
-        a href="/" ADMIN
+
 
 
     == yield

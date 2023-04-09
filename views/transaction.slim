@@ -1,0 +1,14 @@
+table
+  tr
+    th Id
+    th Sender id
+    th Receiver id
+    th Size
+    th Time
+  - for transaction_log in transactions_logs
+    tr
+      td #{transaction_log.id}
+      td #{transaction_log.sender_id}
+      td #{transaction_log.receiver_id}
+      td $#{display_dollars(transaction_log.size)}
+      td #{epoch_to_date(transaction_log.time)}

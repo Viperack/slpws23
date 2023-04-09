@@ -1,25 +1,28 @@
-- if session[:transfer_error] != "" 
-   h3 = session[:transfer_error]
+- if session[:bank_accounts].select {|bank_account| bank_account.locked == 0}.length < 1
+    h3 You don't have any bank accounts to transfer from
+- else
+    - if session[:transfer_error] != ""
+       h3 = session[:transfer_error]
 
-form action="/home/transfer" method="POST"
-    h3 How much money do you want to transfer?
-    input type="number" name="transfer_size" placeholder="$USD" step=".01"
+    form action="/home/transfer" method="POST"
+        h3 How much money do you want to transfer?
+        input type="number" name="transfer_size" placeholder="$USD" step=".01"
 
-    h3 Which of your accounts do you want to transfer money from?
-    select name="origin_bank_account_id"
-        - for bank_account in session[:bank_accounts]
-            - if bank_account.locked == 0
-                option value="#{bank_account.id}" #{bank_account.name} ($#{display_balance(bank_account.balance)})
+        h3 Which of your accounts do you want to transfer money from?
+        select name="origin_bank_account_id"
+            - for bank_account in session[:bank_accounts]
+                - if bank_account.locked == 0
+                    option value="#{bank_account.id}" #{bank_account.name} ($#{display_dollars(bank_account.balance)})
 
-    h3 Which of your accounts do you want to transfer money to?
-    select name="destination_bank_account_id"
-        - for bank_account in session[:bank_accounts]
-            - if bank_account.locked == 0
-                option value="#{bank_account.id}" #{bank_account.name} ($#{display_balance(bank_account.balance)})
-        option value="IBAN" IBAN
-        
-    
-    h3 = "(Optional) Send money to account by IBAN"
-    input type="text" name="destination_iban" placeholder="IBAN"
+        h3 Which of your accounts do you want to transfer money to?
+        select name="destination_bank_account_id"
+            - for bank_account in session[:bank_accounts]
+                - if bank_account.locked == 0
+                    option value="#{bank_account.id}" #{bank_account.name} ($#{display_dollars(bank_account.balance)})
+            option value="IBAN" IBAN
 
-    input type="submit" value="Submit"
+
+        h3 = "(Optional) Send money to account by IBAN"
+        input type="text" name="destination_iban" placeholder="IBAN"
+
+        input type="submit" value="Submit"

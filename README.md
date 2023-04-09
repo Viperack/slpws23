@@ -1,12 +1,8 @@
 ## TODO
+- Yardoc
 - Cool down for if user attemps to many logins ins in a short timeframe
 - Only accept strong passwords from user
-- Admin accounts which can change time deposits and interest rates and transaction logs
-- Pay loans
-- Add interest to loans
-- Error message sends back given information
-- Validering
-- Yardoc
+- Ability to add interest rate
 
 # slpws23
 Slutprojekt 2023 Webbserverprogrammering.

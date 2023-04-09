@@ -1,11 +1,11 @@
 class Loan
-  attr_reader :id, :size, :amount_payed, :start_time, :interest
+  attr_reader :id, :size, :amount_payed, :interest_payment_date, :interest
 
   def initialize(loan_as_hash)
     @id = loan_as_hash["id"]
     @size = loan_as_hash["size"]
     @amount_payed = loan_as_hash["amount_payed"]
-    @start_time = loan_as_hash["start_time"]
+    @interest_payment_date = loan_as_hash["interest_payment_date"]
     @interest = loan_as_hash["interest"]
   end
 
@@ -14,7 +14,7 @@ class Loan
     puts "id: #{@id}"
     puts "size: #{@size}"
     puts "amount_payed: #{@amount_payed}"
-    puts "start_time: #{@start_time}"
+    puts "interest_payment_date: #{@interest_payment_date}"
     puts "interest: #{@interest}"
   end
 end

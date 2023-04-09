@@ -6,19 +6,30 @@ h2 Bank accounts
 - for i in 0...bank_accounts.length
     h3 #{bank_accounts[i].name}
     p IBAN: #{display_iban(bank_accounts[i].iban)}
-    p Balance: $#{display_balance(bank_accounts[i].balance)}
+    p Balance: $#{display_dollars(bank_accounts[i].balance)}
     - if bank_accounts[i].locked == 1
         p Unlock date: #{epoch_to_date(bank_accounts[i].unlock_date)}
-        p Interest rate: #{display_balance(bank_accounts[i].interest)}%
-    a href="/home/bank_account/#{i}/close" Close bank account
-    a href="/home/bank_account/#{i}/add_user" Add user to bank account
+        p Interest rate: #{display_dollars(bank_accounts[i].interest)}%
+    a href="/home/bank_account/#{bank_accounts[i].id}/close" Close bank account
+    a href="/home/bank_account/#{bank_accounts[i].id}/add_user" Add user to bank account
 
 h2 Loans
 - for i in 0...loans.length
-    p Size: $#{display_balance(loans[i].size)}
-    p Remaining: $#{display_balance(loans[i].size - loans[i].amount_payed)}
-    - puts "Start date #{loans[i].start_time}"
-    p Start date: #{epoch_to_date(loans[i].start_time)}
-    p Interest rate: #{display_balance(loans[i].interest)}%
-    a href="/home/loan/#{i}/pay" Pay loan
-    a href="/home/loan/#{i}/add_user" Add user to loan
+    p Size: $#{display_dollars(loans[i].size)}
+    p Remaining: $#{display_dollars(loans[i].size - loans[i].amount_payed)}
+    p Start date: #{epoch_to_date(loans[i].interest_payment_date)}
+    p Interest rate: #{display_dollars(loans[i].interest)}%
+    a href="/home/loan/#{loans[i].id}/pay" Pay loan
+    a href="/home/loan/#{loans[i].id}/add_user" Add user to loan
+
+h2 Loan invites
+- for i in 0...loan_invites_as_loans.length
+    p Size: $#{display_dollars(loan_invites_as_loans[i].size)}
+    p Remaining: $#{display_dollars(loan_invites_as_loans[i].size - loan_invites_as_loans[i].amount_payed)}
+    p Start date: #{epoch_to_date(loan_invites_as_loans[i].interest_payment_date)}
+    p Interest rate: #{display_dollars(loan_invites_as_loans[i].interest)}%
+    p Owners: #{display_users_from_array(loan_invites_owners[i])}
+    form action="/home/loan_invite/#{loan_invites[i].id}/accept" method="POST"
+        input type="submit" value="Accept"
+    form action="/home/loan_invite/#{loan_invites[i].id}/reject" method="POST"
+        input type="submit" value="Reject"
