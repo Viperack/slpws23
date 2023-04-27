@@ -230,6 +230,7 @@ class Database
   # @option arguments [Integer] id The wished bank_account_id that is wished to be used for the filtering
   # @option arguments [String] iban The wished iban that is wished to be used for the filtering
   # @option arguments [Integer] user_id The wished user_id that is wished to be used for the filtering
+  #
   # @return [Array<Bank_account>] Array of the retrieved bank accounts.
   def get_bank_accounts(**arguments)
     if arguments[:id]
@@ -416,7 +417,12 @@ class Database
     nil
   end
 
-  # Interest
+  # Retrieves interests from the database and can filter on a number of attributes
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] type The type of interest
+  #
+  # @return [Array<Interest>] Array of the retrieved interests.
   def get_interest(**arguments)
 
     case arguments[:type]
@@ -441,6 +447,14 @@ class Database
     Array.new(interests_as_hash.length) { |i| Interest.new(interests_as_hash[i]) }
   end
 
+  # Updates interests from the database. Interest is identified with id and multiple attributes can be updated.
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] id The wished bank_account_id that is wished to be used for the filtering
+  # @option arguments [String] rate The new interest rate
+  # @option arguments [Integer] time_deposit The new time_deposit
+  #
+  # @return [void]
   def update_interest(**arguments)
     if !arguments[:id]
       return -1
@@ -485,7 +499,12 @@ class Database
     return nil
   end
 
-  # Loan
+  # Inserts a loan into the database
+  #
+  # @param [Integer] user_id The user_id
+  # @param [Integer] loan_size The loan_size
+  #
+  # @return [void]
   def create_loan(user_id, loan_size)
     sql = <<-SQL
       INSERT INTO Loan (size, amount_payed, interest_payment_date, interest)
@@ -503,6 +522,13 @@ class Database
     loan_id
   end
 
+  # Retrieves loans from the database and can filter on a number of attributes
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] id The id of the loan
+  # @option arguments [Integer] user_id The id of the owner of the loan
+  #
+  # @return [Array<Loan>] Array of the retrieved loans.
   def get_loans(**arguments)
     if arguments[:id]
       sql = <<-SQL
@@ -537,18 +563,36 @@ class Database
     Array.new(loans_as_hashes.length) { |i| Loan.new(loans_as_hashes[i]) }
   end
 
+  # Checks if a loan is fully paid
+  #
+  # @param [Integer] loan_id The id of the loan
+  #
+  # @return [Boolean] Whether a loan is fully paid or not
   def loan_fully_paid?(loan_id)
     loan = get_loans(id: loan_id).first
 
     loan.amount_payed >= loan.size
   end
 
+  # Checks if a loan is expired
+  #
+  # @param [Integer] loan_id The id of the loan
+  #
+  # @return [Boolean] Whether the a loan is expired
   def loan_expired?(loan_id)
     loan = $db.get_loans(id: loan_id).first
 
     return loan.interest_payment_date <= Time.now.to_i
   end
 
+  # Updates loan from the database. Loan is identified with id and multiple attributes can be updated.
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] id The wished bank_account_id that is wished to be used for the filtering
+  # @option arguments [String] size The increase in the size of the loan
+  # @option arguments [Integer] amount_payed The increase in the amount payed back on the loan
+  #
+  # @return [void]
   def update_loan(**arguments)
     if arguments[:size] && arguments[:amount_payed]
       loan = get_loans(id: arguments[:id]).first
@@ -562,7 +606,7 @@ class Database
       WHERE id = ?
       SQL
 
-      @db.execute(sql, arguments[:size], arguments[:size], arguments[:id])
+      @db.execute(sql, arguments[:size], arguments[:amount_payed], arguments[:id])
     end
 
     if arguments[:size]
@@ -607,6 +651,11 @@ class Database
     return nil
   end
 
+  # Deletes a loan
+  #
+  # @param [Integer] loan_id
+  #
+  # @return [void]
   def delete_loan(loan_id)
     delete_loan_invite(loan_id: loan_id)
 
@@ -620,8 +669,12 @@ class Database
     @db.execute(sql, loan_id)
   end
 
-  # Loan invite
-
+  # Inserts a loan_invite into the database
+  #
+  # @param [Integer] user_id The user_id
+  # @param [Integer] loan_id The loan_id
+  #
+  # @return [void]
   def create_loan_invite(user_id, loan_id)
     sql = <<-SQL
       INSERT INTO Loan_invite (user_id, loan_id)
@@ -631,6 +684,11 @@ class Database
     @db.execute(sql, user_id, loan_id)
   end
 
+  # Retrieves loan_invites from the database and can filter on a attributes
+  #
+  # @param [Integer] user_id The id of the user that owns the loan_invite
+  #
+  # @return [Array<Loan_invite>] Array of the retrieved loan_invites.
   def get_loan_invites(user_id)
     sql = <<-SQL
       SELECT *
@@ -643,6 +701,13 @@ class Database
     Array.new(loan_invites_as_hash.length) { |i| Loan_invite.new(loan_invites_as_hash[i]) }
   end
 
+  # Deletes a loan_invite
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] id The id of the loan_invite
+  # @option arguments [String] loan_id The id of the owner of the loan_invite
+  #
+  # @return [void]
   def delete_loan_invite(**arguments)
     if arguments[:id]
       sql = <<-SQL
@@ -661,11 +726,16 @@ class Database
 
       @db.execute(sql, arguments[:loan_id])
     end
-
-
   end
 
-  # Transaction
+  # Inserts a transaction_log into the database
+  #
+  # @param [Integer] sender_id The id of the sender of the transaction
+  # @param [Integer] receiver_id The id of the receiver of the transaction
+  # @param [Integer] size The size of the transaction
+  # @param [Integer] time The tim in epoch that the transaction was made
+  #
+  # @return [void]
   def create_transaction_log(sender_id, receiver_id, size, time)
     puts "#{sender_id} sent #{receiver_id}, $#{size} at #{time}"
 
@@ -677,6 +747,9 @@ class Database
     @db.execute(sql, sender_id, receiver_id, size, time)
   end
 
+  # Retrieves transactions_logs from the database
+  #
+  # @return [Array<Transaction>] Array of the retrieved transactions.
   def get_transactions_logs
     sql = <<-SQL
       SELECT *

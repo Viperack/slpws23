@@ -1,23 +1,35 @@
+# Shows the different kinds of bank accounts
 get("/home/bank_account/open") do
   slim(:"/home/bank_account/open/index")
 end
 
+# Takes in information to open a payroll account
 get("/home/bank_account/open/payroll") do
   slim(:"/home/bank_account/open/payroll")
 end
 
+# Opens a payroll account
+#
+# @param [String] :name The name of the payroll account
 post("/home/bank_account/open/payroll") do
   $db.create_bank_account(session[:user].id, 0, Time.now.to_i, params[:name], 0)
 
   redirect("/home")
 end
 
+# Takes in information to open a savings account
 get("/home/bank_account/open/savings") do
   interests = $db.get_interest(type: "Savings")
 
   slim(:"/home/bank_account/open/savings", locals: { interests: interests })
 end
 
+# Opens a savings account
+#
+# @param [String] :transfer_size The size of the money put into the savings account
+# @param [String] :time_deposit For how long the account should be locked
+# @param [String] :origin_bank_account_id The id of the bank account where the money comes from. -1 = deposit
+# @param [String] :name The name of savings account
 post("/home/bank_account/open/savings") do
   transfer_size = string_dollar_to_int_cent(params[:transfer_size])
   time_deposit = params[:time_deposit].split(",")[0].to_i
@@ -47,6 +59,7 @@ post("/home/bank_account/open/savings") do
   redirect("/home")
 end
 
+# Takes in information to close a bank account
 get("/home/bank_account/:id/close") do
   closing_bank_account_id = params[:id].to_i
 
@@ -62,6 +75,11 @@ get("/home/bank_account/:id/close") do
   slim(:"home/bank_account/close", locals: { closing_bank_account: closing_bank_account, bank_accounts: session[:bank_accounts]})
 end
 
+# Closes a bank account
+#
+# @param [String] :id The id of the closing bank account
+# @param [String] "origin_bank_account_id" The id of the account where the money comes from
+# @param [String] "destination_bank_account_id" The id of the bank account where the money should be sent
 post("/home/bank_account/:id/close") do
   closing_bank_account_id = params[:id].to_i
 
@@ -83,10 +101,15 @@ post("/home/bank_account/:id/close") do
   redirect("/home")
 end
 
+# Takes in information to make a deposit
 get("/home/deposit") do
   slim(:"home/deposit", locals: { bank_accounts: session[:bank_accounts] })
 end
 
+# Makes a deposit
+#
+# @param [String] "deposit_size" The amount of money deposited
+# @param [String] "destination_bank_account_id" The id of the bank account where the money is sent
 post("/home/deposit") do
   deposit_size = string_dollar_to_int_cent(params["deposit_size"])
 
@@ -97,10 +120,17 @@ post("/home/deposit") do
   redirect("/home")
 end
 
+# Takes in information to make a transfer
 get("/home/transfer") do
   slim(:"home/transfer")
 end
 
+# Makes a transfer
+#
+# @param [String] "destination_iban" The iban of the bank account where the money is sent
+# @param [String] "transfer_size" The size of the transfer
+# @param [String] "destination_bank_account_id" The id of the bank account where the money is sent
+# @param [String] "origin_bank_account_id" The id of the bank account where the money is from
 post("/home/transfer") do
   destination_iban = params["destination_iban"].gsub(/\s+/, "").gsub("-", "")
   transfer_size = string_dollar_to_int_cent(params["transfer_size"])
@@ -132,6 +162,7 @@ post("/home/transfer") do
   redirect("/home")
 end
 
+# Takes in information to add a user to a bank account
 get("/home/bank_account/:id/add_user") do
   bank_account_id = params[:id].to_i
 
@@ -145,6 +176,10 @@ get("/home/bank_account/:id/add_user") do
   slim(:"home/bank_account/add_user", locals: { bank_account_id: params[:id].to_i })
 end
 
+# Adds a user to a bank account
+#
+# @param [String] :id The id of the bank account
+# @param [String] :add_user_email The email of the user that is added
 post("/home/bank_account/:id/add_user") do
   bank_account_id = params[:id].to_i
 
@@ -176,12 +211,17 @@ post("/home/bank_account/:id/add_user") do
   redirect("/home")
 end
 
+# Takes in information to make a loan
 get("/home/loan/take") do
   rate = $db.get_interest(type: "Loan").first.rate
 
   slim(:"/home/loan/take", locals: { rate: rate })
 end
 
+# Takes a loan
+#
+# @param [String] "loan_size" The size of the loan
+# @param [String] "destination_bank_account_id" The id of the bank account where the money is sent
 post("/home/loan/take") do
   loan_size = string_dollar_to_int_cent(params["loan_size"])
 
@@ -194,6 +234,7 @@ post("/home/loan/take") do
   redirect("/home")
 end
 
+# Takes in information to loan payment
 get("/home/loan/:id/pay") do
   loan_id = params[:id].to_i
 
@@ -207,6 +248,11 @@ get("/home/loan/:id/pay") do
   slim(:"/home/loan/pay", locals: { loan_id: params[:id].to_i })
 end
 
+# Makes payment on a loan
+#
+# @param [String] :loan_payment_size The size of the payment
+# @param [String] :id The id of the loan
+# @param [String] :origin_bank_account_id The id of the bank account where the money is from
 post("/home/loan/:id/pay") do
   loan_payment_size = string_dollar_to_int_cent(params[:loan_payment_size])
   loan_id = params[:id].to_i
@@ -238,6 +284,7 @@ post("/home/loan/:id/pay") do
   redirect("/home")
 end
 
+# Takes in information to invite a user to a loan
 get("/home/loan/:id/add_user") do
   loan_id = params[:id].to_i
 
@@ -251,6 +298,10 @@ get("/home/loan/:id/add_user") do
   slim(:"/home/loan/add_user", locals: { loan_id: loan_id })
 end
 
+# Invites a user to a loan
+#
+# @param [String] :id The id of the loan
+# @param [String] :add_user_email The email of the user that is added
 post("/home/loan/:id/add_user") do
   added_user = $db.get_users(email: params[:add_user_email]).first
   loan_id = params[:id].to_i
@@ -287,10 +338,14 @@ post("/home/loan/:id/add_user") do
   redirect("/home")
 end
 
+# Shows the user that they do not have access to the resource they were trying to access
 get("/access_denied") do
   slim(:access_denied)
 end
 
+# Adds the loan that the user was invited to and removes the loan_invite
+#
+# @param [String] :id The id of the loan_invite
 post("/home/loan_invite/:id/accept") do
   loan_id = nil
   loan_invite_id = params[:id].to_i
@@ -318,6 +373,9 @@ post("/home/loan_invite/:id/accept") do
   redirect("/home")
 end
 
+# Removes the loan_invite
+#
+# @param [String] :id The id of the loan_invite
 post("/home/loan_invite/:id/reject") do
   loan_invite_id = params[:id].to_i
   loan_invites = $db.get_loan_invites(session[:user].id)

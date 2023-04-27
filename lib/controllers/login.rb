@@ -1,3 +1,4 @@
+# Landing page
 get("/") do
   # Reset database
   # $db.reset_database
@@ -8,10 +9,15 @@ get("/") do
   slim(:index)
 end
 
+# Takes in the information to sign in a user
 get("/sign_in") do
   slim(:sign_in)
 end
 
+# Signs in the user to the website
+#
+# @param [String] "email" The email of the user
+# @param [String] "password" The password of the user
 post("/sign_in") do
 
   if params["email"] == ""
@@ -49,11 +55,13 @@ post("/sign_in") do
   end
 end
 
+# Signs the user out by clearing the session
 get("/sign_out") do
   session.clear
   redirect("/")
 end
 
+# Automatically signs in for easier debugging
 get("/debug") do
   email = "theok04@gmail.com"
   password = 1

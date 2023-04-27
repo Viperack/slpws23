@@ -1,3 +1,4 @@
+# Shows the transaction logs
 get("/transaction") do
   if session[:user].permission_level != 1
     redirect("/access_denied")
@@ -8,6 +9,7 @@ get("/transaction") do
   slim(:transaction, locals:{transactions_logs: transactions_logs})
 end
 
+# Shows the interests
 get("/interest") do
   if session[:user].permission_level != 1
     redirect("/access_denied")
@@ -19,6 +21,7 @@ get("/interest") do
 
 end
 
+# Takes in the information for the update of an interest
 get("/interest/:id/update") do
   if session[:user].permission_level != 1
     redirect("/access_denied")
@@ -30,6 +33,11 @@ get("/interest/:id/update") do
   slim(:"interest/update", locals:{interest: interest})
 end
 
+# Performes error handling and creates a user account
+#
+# @param [String] :id The id of the interest
+# @param [String] :rate The new interest rate
+# @param [String] :time_deposit The new time_deposit
 post("/interest/:id/update") do
   if session[:user].permission_level != 1
     redirect("/access_denied")

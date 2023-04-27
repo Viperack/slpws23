@@ -1,7 +1,14 @@
+# Takes information from the user to create a bank accoount and can display error messages
 get("/sign_up") do
   slim(:sign_up)
 end
 
+# Performes error handling and creates a user account
+#
+# @param [String] "name" The name of the user
+# @param [String] "email" The email of the user
+# @param [String] "password" The password of the user
+# @param [String] "password_confirm" The password that is used to check if the user wrote the right password
 post("/sign_up") do
   if params["name"] == ""
     session[:sign_up_error] = "Name must be entered to sign up"

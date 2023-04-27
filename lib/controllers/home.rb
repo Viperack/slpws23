@@ -1,3 +1,4 @@
+# Shows the user the home pages which contains the users bank accounts, lonas and loan invites
 get("/home") do
   session[:bank_accounts] = $db.get_bank_accounts(user_id: session[:user].id)
   session[:loans] = $db.get_loans(user_id: session[:user].id)

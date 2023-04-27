@@ -75,10 +75,20 @@ before do
 end
 
 helpers do
+  # Formats a balance
+  #
+  # @param [Integer] balance The balance in cents
+  #
+  # @return [Int] The balance in dollars
   def display_dollars(balance)
     (balance / 100.0).round(2)
   end
 
+  # Formats a balance by inserting whitespacen every four characters
+  #
+  # @param [String] iban_string The iban_string
+  #
+  # @return [String] The formatet iban_string
   def display_iban(iban_string)
     iban_string.insert(4, " ")
     iban_string.insert(9, " ")
@@ -86,22 +96,42 @@ helpers do
     return iban_string
   end
 
+  # Converts time in epoch to a date
+  #
+  # @param [Int] seconds Seconds since epoch
+  #
+  # @return [Time] The date
   def epoch_to_date(seconds)
     return Time.at(seconds)
   end
 
+  # Formats a dollar in a string to cents as a integer
+  #
+  # @param [Integer] string_dollar The balance in dollars
+  #
+  # @return [Int] The balance in cents
   def string_dollar_to_int_cent(string_dollar)
     dollar_cent_array = string_dollar.split(".", 2).map { |element| element.to_i }
 
     cent = dollar_cent_array[0] * 100 + (dollar_cent_array[1] == nil ? 0 : dollar_cent_array[1])
   end
 
+  # Retrieves information abouta loan and calculates the remainder
+  #
+  # @param [Integer] loan_id The id of the loan
+  #
+  # @return [Int] The remainder of the loan
   def get_loan_rest(loan_id)
     loan = $db.get_loans(id: loan_id).first
 
     return loan.size - loan.amount_payed
   end
 
+  # Formats an array of strings of users names into a string of their names
+  #
+  # @param [Array<String>] user_array The array with the usernames
+  #
+  # @return [String] The string with all the usernames
   def display_users_from_array(user_array)
     string = ""
 
