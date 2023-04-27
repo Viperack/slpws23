@@ -1,5 +1,4 @@
 ## TODO
-- Yardoc
 - Cool down for if user attemps to many logins ins in a short timeframe
 - Only accept strong passwords from user
 - Ability to add interest rate
