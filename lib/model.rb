@@ -131,8 +131,9 @@ class Database
 
   # Deletes a user_bank_account relationship
   #
-  # @param [Integer] user_id The user_id that is wished to be used for the filtering to delete
-  # @param [Integer] bank_account_id The bank_account_id that is wished to be used for the filtering to delete
+  # @param [Hash] arguments
+  # @option arguments [Integer] user_id The user_id that is wished to be used for the filtering to delete
+  # @option arguments [Integer] bank_account_id The bank_account_id that is wished to be used for the filtering to delete
   #
   # @return [void]
   def delete_user_bank_account_rel(**arguments)
@@ -285,13 +286,14 @@ class Database
     get_bank_accounts(id: bank_account_id).first.balance + transfer_size < 0
   end
 
-  # Retrieves bank accounts from the database and can filter on a number of attributes
+  # Updates bank accounts from the database. Bank account is identified with bank_account_id and multiple attributes can be updated.
   #
   # @param [Hash] arguments
   # @option arguments [Integer] id The wished bank_account_id that is wished to be used for the filtering
-  # @option arguments [String] iban The wished iban that is wished to be used for the filtering
-  # @option arguments [Integer] user_id The wished user_id that is wished to be used for the filtering
-  # @return [Array<Bank_account>] Array of the retrieved bank accounts.
+  # @option arguments [String] balance The increase in balance
+  # @option arguments [Integer] locked Whether the bank account is locked or not, 0 = unlocked, 1 = locked
+  #
+  # @return [void]
   def update_bank_account(**arguments)
     if !arguments[:id]
       return nil
@@ -319,7 +321,7 @@ class Database
       SQL
 
       return @db.execute(sql, arguments[:balance], arguments[:id])
-    end
+    end 
 
     if arguments[:locked]
       sql = <<-SQL
@@ -334,6 +336,11 @@ class Database
     nil
   end
 
+  # Deletes a bank_account from the database
+  #
+  # @param [Integer] bank_account_id The bank_account_id of the bank_account that is wished to be deleted
+  #
+  # @return [void]
   def delete_bank_account(bank_account_id)
     sql = <<-SQL
       DELETE FROM User_bank_account_rel
@@ -350,7 +357,12 @@ class Database
     @db.execute(sql, bank_account_id)
   end
 
-  # User_loan_rel
+  # Inserts a user_loan_rel into the database
+  #
+  # @param [Integer] user_id The user_id
+  # @param [Integer] loan_id The loan_id
+  #
+  # @return [void]
   def create_user_loan_rel(user_id, loan_id)
     sql = <<-SQL
       INSERT INTO User_loan_rel (user_id, loan_id)
@@ -360,6 +372,11 @@ class Database
     @db.execute(sql, user_id, loan_id)
   end
 
+  # Retrieves user_id from the database that matches a loan_id in the User_loan_rel table
+  #
+  # @param [Integer] id The id of the the loan
+  #
+  # @return [Array<Integer>] Array of the retrieved user_id s.
   def get_user_id_from_loan_rel(loan_id)
     sql = <<-SQL
       SELECT user_id
@@ -370,6 +387,13 @@ class Database
     return @db.execute(sql, loan_id)
   end
 
+  # Deletes a user_loan_rel relationship
+  #
+  # @param [Hash] arguments
+  # @option arguments [Integer] user_id The user_id that is wished to be used for the filtering to delete
+  # @option arguments [Integer] bank_account_id The bank_account_id that is wished to be used for the filtering to delete
+  #
+  # @return [void]
   def delete_user_loan_rel(**arguments)
     if arguments[:user_id]
       sql = <<-SQL
