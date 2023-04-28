@@ -42,6 +42,8 @@ Thread.new do
   end
 end
 
+ips = {}
+
 before do
   if request.path_info != "/sign_in"
     session[:sign_in_error] = nil
@@ -71,6 +73,19 @@ before do
 
   if !unprotected_paths.include?(request.path_info) && !session[:user]
     redirect("/")
+  end
+
+  if request.request_method == "POST"
+    puts "T"
+    if ips[request.ip]
+      puts "H"
+      if Time.now.to_i - ips[request.ip] <= 1
+        ips[request.ip] = Time.now.to_i
+        halt "You are sending too many requests, wait a couple of seconds"
+      end
+    end
+  
+    ips[request.ip.to_s] = Time.now.to_i
   end
 end
 
